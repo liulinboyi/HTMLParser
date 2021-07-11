@@ -1,0 +1,11 @@
+/node_modules/
+/src/*.js.map
+/dist/*.js.map
+/dist/examples/*/*.js.map
+/.cache/
+/dist/src/*.js.map
+/dist/vm/*.js.map
+/dist/test/*.js.map
+/dist/src/*/*.js.map
+/dist/vm/*/*.js.map
+/out/*.json
