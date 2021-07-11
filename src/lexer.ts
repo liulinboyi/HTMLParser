@@ -206,7 +206,7 @@ export class Lexer {
     }
     checkCode(c: string) {
         // 确保源代码，不包含非法字符，对应着SourceCharacter的EBNF
-        if (!/\u0009|\u000A|\u000D|[\u0020-\uFFFF]/.test(this.sourceCode[0])) {
+        if (!/\u0009|\u000A|\u000D|[\u0020-\uFFFF]/.test(c)) {
             throw new Error('The source code contains characters that cannot be parsed.')
         }
     }
