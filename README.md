@@ -24,7 +24,7 @@
 
 ## AST
 <details>
-<summary>AST</summary>
+<summary>点击查看详情(Click to view details)</summary>
 <pre><code>
 {
     "type": "root",
