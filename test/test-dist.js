@@ -1,6 +1,6 @@
 const fs = require('fs')
 const path = require('path')
-import { paser } from '../src/index'
+const paser = require('../dist/index').paser
 
 let paths = [
     "demo.html",
@@ -27,12 +27,12 @@ let paths = [
 ]
 
 for (let p of paths) {
-    let code = fs.readFileSync(path.resolve(__dirname, `../demo/${p}`), { encoding: 'utf-8' })
+    let code = fs.readFileSync(path.resolve(__dirname, `../demo/${p}`), {encoding: 'utf-8'})
     // console.log(code, 'code')
     if (code.length > 0) {
-        // console.time("test")
+        console.time("test")
         let ast = paser(code)
-        // console.timeEnd("test")
+        console.timeEnd("test")
         // console.log(__dirname, __filename)
         console.log(path.resolve(__dirname, "../out/", `./${p}.ast.json`))
         fs.writeFileSync(path.resolve(__dirname, "../out/", `./${p}.ast.json`), JSON.stringify(ast, null, 4))

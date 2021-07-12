@@ -37,18 +37,19 @@ function parseStatements(lexer) {
             continue;
         let stack = statements;
         let s = statement;
+        const length = stack.length - 1;
         if (!s.closeTag) {
-            stack[stack.length - 1].children.push(s); // 栈顶就是levalElement层级元素
+            stack[length].children.push(s); // 栈顶就是levalElement层级元素
             if (s.type === "tag" && !s.selfClose && !tagClose_1.isSpecialTag(s)) {
                 stack.push(s);
             }
         }
         else {
-            if (stack[stack.length - 1].tag !== s.tag) {
-                stack[stack.length - 1].children.push(s);
+            if (stack[length].tag !== s.tag) {
+                stack[length].children.push(s);
                 // 学习浏览器HTML解析，即使匹配不上也不报错，直接添加到levalElement层级元素当child
-                console.error(`${stack[stack.length - 1].tag} and ${s.tag} is not math! at line ${lexer.GetLineNum()} ${lexer.sourceCode.slice(0, 100)}`);
-                // throw new Error(`${stack[stack.length - 1].tag} and ${s.tag} is not math! at line ${lexer.GetLineNum()} ${lexer.sourceCode.slice(0, 100)}`)
+                console.error(`${stack[length].tag} and ${s.tag} is not math! at line ${lexer.GetLineNum()} ${lexer.sourceCode.slice(0, 100)}`);
+                // throw new Error(`${stack[length].tag} and ${s.tag} is not math! at line ${lexer.GetLineNum()} ${lexer.sourceCode.slice(0, 100)}`)
             }
             else {
                 stack.pop();
@@ -64,10 +65,10 @@ function parseStatement(lexer) {
     let flag = false;
     let top = lexer.stack[lexer.stack.length - 1];
     if (parseText_1.isClose(lexer) &&
-        top.tokenType !== lexer_1.TOKEN_LEFT_PAREN &&
-        top.tokenType !== lexer_1.TOKEN_CLOSE &&
-        top.tokenType !== lexer_1.TOKEN_DTD &&
-        top.tokenType !== lexer_1.COMMENT) {
+        top.tokenType !== lexer_1.TOKEN_LEFT_PAREN /*<*/ &&
+        top.tokenType !== lexer_1.TOKEN_CLOSE /*</*/ &&
+        top.tokenType !== lexer_1.TOKEN_DTD /*DTD*/ &&
+        top.tokenType !== lexer_1.COMMENT /*COMMENT*/) {
         flag = true;
     }
     else {

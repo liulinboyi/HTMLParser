@@ -10,56 +10,47 @@ class Node {
 }
 exports.Node = Node;
 function isClose(lexer) {
-    if (lexer.stack.length >= 2 &&
-        (lexer.stack[lexer.stack.length - 2].tokenType === lexer_1.TOKEN_DTD /*dtd*/ ||
-            lexer.stack[lexer.stack.length - 2].tokenType === lexer_1.COMMENT /*comment*/)) {
+    const length = lexer.stack.length;
+    const topTwo = length >= 2 ? lexer.stack[length - 2].tokenType : "";
+    const isTOKEN_DTD = topTwo === lexer_1.TOKEN_DTD;
+    const isCOMMENT = topTwo === lexer_1.COMMENT;
+    if (length >= 2 &&
+        (isTOKEN_DTD /*dtd*/ ||
+            isCOMMENT /*comment*/)) {
         return true;
     }
-    if (lexer.stack.length < 4)
+    if (length < 4)
         return false;
+    const topThree = lexer.stack[length - 3].tokenType;
+    const topFour = lexer.stack[length - 4].tokenType;
+    const isTOKEN_RIGHT_PAREN = topTwo === lexer_1.TOKEN_RIGHT_PAREN;
+    const isTOKEN_NAME = topThree === lexer_1.TOKEN_NAME;
     // </a>
-    let one = lexer.stack[lexer.stack.length - 2].tokenType === lexer_1.TOKEN_RIGHT_PAREN /*>*/ &&
-        lexer.stack[lexer.stack.length - 3].tokenType === lexer_1.TOKEN_NAME /*tag_name*/ &&
-        lexer.stack[lexer.stack.length - 4].tokenType === lexer_1.TOKEN_CLOSE /*</*/;
+    let one = isTOKEN_RIGHT_PAREN /*>*/ &&
+        isTOKEN_NAME /*tag_name*/ &&
+        topFour === lexer_1.TOKEN_CLOSE /*</*/;
     // <a>
-    let close = lexer.stack[lexer.stack.length - 2].tokenType === lexer_1.TOKEN_RIGHT_PAREN /*>*/ &&
-        lexer.stack[lexer.stack.length - 3].tokenType === lexer_1.TOKEN_NAME /*tag_name*/ &&
-        lexer.stack[lexer.stack.length - 4].tokenType === lexer_1.TOKEN_LEFT_PAREN /*<*/;
+    let close = isTOKEN_RIGHT_PAREN /*>*/ &&
+        topThree === lexer_1.TOKEN_NAME /*tag_name*/ &&
+        topFour === lexer_1.TOKEN_LEFT_PAREN /*<*/;
     // />
-    let selfClose = lexer.stack[lexer.stack.length - 2].tokenType === lexer_1.TOKEN_SELF_CLOSE; // /> <br />
+    let selfClose = topTwo === lexer_1.TOKEN_SELF_CLOSE; // /> <br />
     return one || close || selfClose;
 }
 exports.isClose = isClose;
 function contentEnd(lexer) {
-    // if (isClose(lexer) && lexer.stack.length >= 3 && lexer.stack[lexer.stack.length - 3].token === "script") {
-    //     let script = "</script>"
-    //     if (lexer.sourceCode.slice(0, script.length) === script) {
-    //         return false
-    //     } else {
-    //         return true
-    //     }
-    // } else {
-    //     if (lexer.sourceCode.slice(0, 2) === "</" ||
-    //         (isClose(lexer) && lexer.sourceCode[0] === "<"
-    //             && /[a-zA-z]+[0-9]*/.test(lexer.sourceCode[1])) ||
-    //         lexer.sourceCode.slice(0, 4) === "<!--"
-    //     ) {
-    //         return false;
-    //     } else {
-    //         return true;
-    //     }
-    // }
     // <div>contentText</div>
     // <div>contentText<div>
     // <meta>contentText<!---->
     // <div>contentText<br /> || <div>contentText<br 属性    />
     let stack = lexer.stack;
+    const length = stack.length;
     if (isClose(lexer) &&
-        stack.length >= 4 &&
-        stack[stack.length - 2].tokenType === lexer_1.TOKEN_RIGHT_PAREN /*>*/ &&
-        stack[stack.length - 3].tokenType === lexer_1.TOKEN_NAME /*name*/ &&
-        stack[stack.length - 4].tokenType === lexer_1.TOKEN_LEFT_PAREN /*<*/) {
-        if (lexer.stack[lexer.stack.length - 3].token === "script") {
+        length >= 4 &&
+        stack[length - 2].tokenType === lexer_1.TOKEN_RIGHT_PAREN /*>*/ &&
+        stack[length - 3].tokenType === lexer_1.TOKEN_NAME /*name*/ &&
+        stack[length - 4].tokenType === lexer_1.TOKEN_LEFT_PAREN /*<*/) {
+        if (lexer.stack[length - 3].token === "script") {
             /*
             <script>
                 '<script src="https://"><\/script>'
@@ -96,10 +87,10 @@ function contentEnd(lexer) {
     // </div>contentText</div>
     // </div>contentText<br />
     if (isClose(lexer) &&
-        stack.length >= 4 &&
-        stack[stack.length - 2].tokenType === lexer_1.TOKEN_RIGHT_PAREN /*>*/ &&
-        stack[stack.length - 3].tokenType === lexer_1.TOKEN_NAME /*name*/ &&
-        stack[stack.length - 4].tokenType === lexer_1.TOKEN_CLOSE /*</*/) {
+        length >= 4 &&
+        stack[length - 2].tokenType === lexer_1.TOKEN_RIGHT_PAREN /*>*/ &&
+        stack[length - 3].tokenType === lexer_1.TOKEN_NAME /*name*/ &&
+        stack[length - 4].tokenType === lexer_1.TOKEN_CLOSE /*</*/) {
         if ((lexer.sourceCode[0] === "<" &&
             /[a-zA-z]+[0-9]*/.test(lexer.sourceCode[1])) /*</div>contentText<div>*/ ||
             lexer.sourceCode.slice(0, 4) === "<!--" /*</div>contentText<!---->*/ ||
@@ -123,10 +114,10 @@ function contentEnd(lexer) {
     // <br />contentText</div>
     // <br />contentText<br />
     if (isClose(lexer) &&
-        stack.length >= 4 &&
-        stack[stack.length - 2].tokenType === lexer_1.TOKEN_SELF_CLOSE /*self-close /> <br />*/ &&
-        stack[stack.length - 3].tokenType === lexer_1.TOKEN_NAME /*name*/ &&
-        stack[stack.length - 4].tokenType === lexer_1.TOKEN_LEFT_PAREN /*<*/) {
+        length >= 4 &&
+        stack[length - 2].tokenType === lexer_1.TOKEN_SELF_CLOSE /*self-close /> <br />*/ &&
+        stack[length - 3].tokenType === lexer_1.TOKEN_NAME /*name*/ &&
+        stack[length - 4].tokenType === lexer_1.TOKEN_LEFT_PAREN /*<*/) {
         if ((lexer.sourceCode[0] === "<"
             && /[a-zA-z]+[0-9]*/.test(lexer.sourceCode[1])) /*<br />contentText<div>*/ ||
             lexer.sourceCode.slice(0, 4) === "<!--" /*<br />contentText<!---->*/ ||
@@ -150,7 +141,7 @@ function contentEnd(lexer) {
     // <!---->contentText</div>
     // <!---->contentText<br />
     if (isClose(lexer) &&
-        stack[stack.length - 2].tokenType === lexer_1.COMMENT /*COMMENT*/) {
+        stack[length - 2].tokenType === lexer_1.COMMENT /*COMMENT*/) {
         if ((lexer.sourceCode[0] === "<" &&
             /[a-zA-z]+[0-9]*/.test(lexer.sourceCode[1])) /*<!---->contentText<div>*/ ||
             lexer.sourceCode.slice(0, 4) === "<!--" /*<!---->contentText<!---->*/ ||
@@ -174,7 +165,7 @@ function contentEnd(lexer) {
     // <!DOCTYPE html>contentText<!---->
     // <!DOCTYPE html>contentText<br />
     if (isClose(lexer) &&
-        stack[stack.length - 2].tokenType === lexer_1.TOKEN_DTD /*DTD*/) {
+        stack[length - 2].tokenType === lexer_1.TOKEN_DTD /*DTD*/) {
         if ((lexer.sourceCode[0] === "<" &&
             /[a-zA-z]+[0-9]*/.test(lexer.sourceCode[1])) /*<!DOCTYPE html>contentText<div>*/ ||
             lexer.sourceCode.slice(0, 4) === "<!--" /*<!DOCTYPE html>contentText<!---->*/ ||

@@ -58,15 +58,19 @@ class Lexer {
         this.hasCache = false;
         this.stack = [];
     }
+    get judgeIsContent() {
+        const length = this.stack.length - 1;
+        return this.stack[length].tokenType === exports.TOKEN_RIGHT_PAREN /*>*/ ||
+            this.stack[length].tokenType === exports.TOKEN_SELF_CLOSE /*/> <br />*/ ||
+            this.stack[length].tokenType === exports.TOKEN_DTD /*dtd*/ ||
+            this.stack[length].tokenType === exports.COMMENT; /*<!---->*/
+    }
     get isContentText() {
         let origin = this.sourceCode;
-        while (this.stack.length > 10) {
-            this.stack.shift();
-        }
-        if (this.stack[this.stack.length - 1].tokenType === exports.TOKEN_RIGHT_PAREN /*>*/ ||
-            this.stack[this.stack.length - 1].tokenType === exports.TOKEN_SELF_CLOSE /*/> <br />*/ ||
-            this.stack[this.stack.length - 1].tokenType === exports.TOKEN_DTD /*dtd*/ ||
-            this.stack[this.stack.length - 1].tokenType === exports.COMMENT /*<!---->*/) {
+        // while (this.stack.length > 10) {
+        //     this.stack.shift()
+        // }
+        if (this.judgeIsContent) {
             this.isIgnored();
             if (this.sourceCode[0] === "<") {
                 this.sourceCode = origin;
@@ -280,7 +284,7 @@ class Lexer {
         每行结尾只有“<换行>”，即"\n"；Windows系统里面，每行结尾是“<回车><换行>”，即“\r\n”；Mac系统里，每行结尾是“<回车>”，即"\r"；。一个直接后果是，Unix/Mac系统下的文件在Windows里打开的话，所有文字会变成一行；而Windows里的文件在Unix/Mac下打开的话，在每行的结尾可能会多出一个^M符号。
         */
         // return c == '\r' || c == '\n'
-        return c == '\n';
+        return c === '\n';
     }
     isEmpty() {
         return this.sourceCode.length === 0;
