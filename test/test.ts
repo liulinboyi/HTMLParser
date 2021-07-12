@@ -1,12 +1,6 @@
 const fs = require('fs')
 const path = require('path')
-const Execute = require('../dist/src/backend.js').Execute
-
-// code = fs.readFileSync(path.resolve(__dirname, '../demo/demo.html'), {encoding: 'utf-8'})
-// console.log(code, 'code')
-// if (code.length > 0) {
-//     Execute(code)
-// }
+import { paser } from '../src/index'
 
 let paths = [
     "demo.html",
@@ -23,17 +17,20 @@ let paths = [
     "MDN HTML.html",
     "MDN JavaScript.html",
     "CSDN.html",
-    "CSDN_SPM.html",
+    "CSDN_SPM.html", // error
     "test9.html",
     "test10.html",
     "test11.html",
+    "test12.html",
+    "test13.html",
+    "test14.html",
 ]
 
 for (let p of paths) {
-    code = fs.readFileSync(path.resolve(__dirname, `../demo/${p}`), {encoding: 'utf-8'})
+    let code = fs.readFileSync(path.resolve(__dirname, `../demo/${p}`), { encoding: 'utf-8' })
     // console.log(code, 'code')
     if (code.length > 0) {
-        let ast = Execute(code)
+        let ast = paser(code)
         // console.log(__dirname, __filename)
         console.log(path.resolve(__dirname, "../out/", `./${p}.ast.json`))
         fs.writeFileSync(path.resolve(__dirname, "../out/", `./${p}.ast.json`), JSON.stringify(ast, null, 4))

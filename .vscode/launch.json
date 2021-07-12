@@ -1,45 +1,24 @@
 {
-    // 使用 IntelliSense 了解相关属性。 
-    // 悬停以查看现有属性的描述。
-    // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
-    "configurations": [
-      {
-        "name": "Test",
-        "program": "${workspaceFolder}/test/test.js",
-        "request": "launch",
-        "skipFiles": [
-            "<node_internals>/**"
-        ],
-        "type": "pwa-node"
-        },
-        {
-            "name": "Launch Program",
-            "program": "${workspaceFolder}/examples/pineapple/main.js",
-            "request": "launch",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
-            "type": "pwa-node"
-        },
-        {
-            "name": "Current TS File",
-            "type": "node",
-            "request": "launch",
-            "args": [
-              "${workspaceRoot}\\examples\\pineapple\\main.ts" // 入口文件
-            ],
-            "runtimeArgs": [
-              "--nolazy",
-              "-r",
-              "ts-node/register"
-            ],
-            "sourceMaps": true,
-            "cwd": "${workspaceRoot}",
-            "protocol": "inspector",
-            "console": "integratedTerminal",
-            "internalConsoleOptions": "neverOpen"
-          }
-    ]
+  // 使用 IntelliSense 了解相关属性。 
+  // 悬停以查看现有属性的描述。
+  // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [{
+    "name": "ts-node",
+    "type": "pwa-node",
+    "request": "launch",
+    "args": [
+      "${relativeFile}" // 入口文件
+    ],
+    "runtimeArgs": [
+      "--nolazy",
+      "-r",
+      "ts-node/register"
+    ],
+    "sourceMaps": true,
+    "cwd": "${workspaceRoot}",
+    "protocol": "inspector",
+    // "console": "integratedTerminal",
+    "internalConsoleOptions": "openOnSessionStart"
+  }]
 }
-

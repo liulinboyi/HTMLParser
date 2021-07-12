@@ -127,7 +127,9 @@ export class Lexer {
             this.stack.shift()
         }
         if (this.stack[this.stack.length - 1].tokenType === TOKEN_RIGHT_PAREN /*>*/ ||
-            this.stack[this.stack.length - 1].tokenType === TOKEN_SELF_CLOSE /*/> <br />*/
+            this.stack[this.stack.length - 1].tokenType === TOKEN_SELF_CLOSE /*/> <br />*/ ||
+            this.stack[this.stack.length - 1].tokenType === TOKEN_DTD /*dtd*/ ||
+            this.stack[this.stack.length - 1].tokenType === COMMENT /*<!---->*/
         ) {
             this.isIgnored()
             if (this.sourceCode[0] === "<") {
@@ -260,12 +262,13 @@ export class Lexer {
                 if (this.sourceCode.slice(0, 4) === "<!--") {
                     this.skipSourceCode(4)
                     let res = { lineNum: this.lineNum, tokenType: COMMENT, token: tokenNameMap[COMMENT] }
+                    this.stack.push(res)
                     return res
                 }
                 else if (this.sourceCode[1] === "!") {
                     this.skipSourceCode(2)
                     let res = { lineNum: this.lineNum, tokenType: TOKEN_DTD, token: tokenNameMap[TOKEN_DTD] }
-                    // this.stack.push(res)
+                    this.stack.push(res)
                     return res
                 } else if (this.isTagNmae()) {
                     this.skipSourceCode(1);
@@ -333,7 +336,15 @@ export class Lexer {
         return this.sourceCode.startsWith(s)
     }
     isNewLine(c: string): boolean {
-        return c == '\r' || c == '\n'
+        /*
+        在Windows中：
+        '\r' 回车，回到当前行的行首，而不会换到下一行，如果接着输出的话，本行以前的内容会被逐一覆盖；
+        '\n' 换行，换到当前位置的下一行，而不会回到行首；
+        Unix系统里:
+        每行结尾只有“<换行>”，即"\n"；Windows系统里面，每行结尾是“<回车><换行>”，即“\r\n”；Mac系统里，每行结尾是“<回车>”，即"\r"；。一个直接后果是，Unix/Mac系统下的文件在Windows里打开的话，所有文字会变成一行；而Windows里的文件在Unix/Mac下打开的话，在每行的结尾可能会多出一个^M符号。
+        */
+        // return c == '\r' || c == '\n'
+        return c == '\n'
     }
     isEmpty() {
         return this.sourceCode.length === 0
@@ -345,22 +356,24 @@ export class Lexer {
             return c == '\r' || c == '\n'
         }
         let isWhiteSpace = function (c: string): boolean {
-            if (['\t', '\n', '\v', '\f', '\r', ' '].includes(c)) {
+            if (['\t', '\v', '\f', ' '].includes(c)) {
                 return true
             }
             return false
         }
         // matching 匹配isIgnored的情况，把isIgnored的字符都吃掉
         while (this.sourceCode.length > 0) {
-            if (this.nextSourceCodeIs("\r\n") || this.nextSourceCodeIs("\n\r")) {
-                this.skipSourceCode(2)
-                this.lineNum += 1
-                isIgnored = true
-            } else if (isNewLine(this.sourceCode[0])) {
-                this.skipSourceCode(1)
-                this.lineNum += 1
-                isIgnored = true
-            } else if (isWhiteSpace(this.sourceCode[0])) {
+            // if (this.nextSourceCodeIs("\r\n") || this.nextSourceCodeIs("\n\r")) {
+            //     this.skipSourceCode(2)
+            //     this.lineNum += 1
+            //     isIgnored = true
+            // } else 
+            // if (isNewLine(this.sourceCode[0])) {
+            //     this.skipSourceCode(1)
+            //     this.lineNum += 1
+            //     isIgnored = true
+            // } else 
+            if (isWhiteSpace(this.sourceCode[0])) {
                 this.skipSourceCode(1)
                 isIgnored = true
             } else {
