@@ -32,6 +32,8 @@ let paths = [
     "test20.html",
     "test21.html",
     "test22.html",
+    "test23.html",
+    "google.html",
     "005055fd7e2625aba5e8d2d370ea4914a152fe50d16620f896cdf4b1a68ba741.html",
     "005055fd7e2625aba5e8d2d370ea4914a152fe50d16620f896cdf4b1a68ba741-origin.html",
     "039c4b966d1f2a0c589ac0aad211fe65500ad1cb58c7f45b34251db7056803ec-origin.html",
