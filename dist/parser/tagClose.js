@@ -18,6 +18,7 @@ function isSpecialTag(node) {
         "meta",
         "area",
         "input",
+        "br"
     ];
     return tags.includes(node.tag);
 }

@@ -9,3 +9,5 @@
 /dist/src/*/*.js.map
 /dist/vm/*/*.js.map
 /out/*.json
+/files/*
+/test/testfile.js

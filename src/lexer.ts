@@ -83,7 +83,7 @@ export const {
 } = Tokens
 
 // regex match patterns
-const regexName = /^[_\d\w]+/
+export const regexName = /[a-zA-z]+[0-9]*([-_:]*[a-zA-z0-9]*)*/
 
 // 关键字
 export const keywords: Keywords = {
@@ -130,12 +130,20 @@ export class Lexer {
     }
 
     get isContentText() {
+        if (this.stack.length < 1) {
+            return true
+        }
+
         let origin = this.sourceCode
         // while (this.stack.length > 10) {
         //     this.stack.shift()
         // }
         if (this.judgeIsContent) {
             this.isIgnored()
+            // <noscript>
+            if (this.stack.length > 2 && this.stack[this.stack.length - 2].token === "noscript") {
+                return true
+            }
             if (this.sourceCode[0] === "<") {
                 this.sourceCode = origin
                 return false
@@ -189,7 +197,7 @@ export class Lexer {
             token: nowToken } = this.GetNextToken()
         // syntax error
         if (tokenType != nowTokenType) {
-            throw new Error(`NextTokenIs(): syntax error near '${tokenNameMap[nowTokenType]}', expected token: {${tokenNameMap[tokenType]}} but got {${tokenNameMap[nowTokenType]}}.`)
+            throw new Error(`NextTokenIs(): syntax error near '${tokenNameMap[nowTokenType]}', expected token: {${tokenNameMap[tokenType]}} but got {${tokenNameMap[nowTokenType]}}. at line ${this.GetLineNum()} ${this.sourceCode.slice(0, 100)}`)
         }
         return { nowLineNum, nowToken, nowTokenType }
     }
@@ -263,6 +271,14 @@ export class Lexer {
 
         switch (this.sourceCode[0]) {
             case '<':
+                if (this.isContentText) {
+                    let contentText = /[\s\S]+/.exec(this.sourceCode[0])
+                    if (contentText) {
+                        let res = { lineNum: this.lineNum, tokenType: TOKEN_CONTENT_TEXT /*ContentText*/, token: contentText[0] }
+                        this.stack.push(res)
+                        return res
+                    }
+                }
                 if (this.sourceCode.slice(0, 4) === "<!--") {
                     this.skipSourceCode(4)
                     let res = { lineNum: this.lineNum, tokenType: COMMENT, token: tokenNameMap[COMMENT] }
@@ -286,26 +302,66 @@ export class Lexer {
                     return res
                 }
             case '>':
+                if (this.isContentText) {
+                    let contentText = /[\s\S]+/.exec(this.sourceCode[0])
+                    if (contentText) {
+                        let res = { lineNum: this.lineNum, tokenType: TOKEN_CONTENT_TEXT /*ContentText*/, token: contentText[0] }
+                        this.stack.push(res)
+                        return res
+                    }
+                }
                 this.skipSourceCode(1)
                 let RES_TOKEN_RIGHT_PAREN = { lineNum: this.lineNum, tokenType: TOKEN_RIGHT_PAREN /*>*/, token: ">" }
                 this.stack.push(RES_TOKEN_RIGHT_PAREN)
                 return RES_TOKEN_RIGHT_PAREN
             case '=': // =
+                if (this.isContentText) {
+                    let contentText = /[\s\S]+/.exec(this.sourceCode[0])
+                    if (contentText) {
+                        let res = { lineNum: this.lineNum, tokenType: TOKEN_CONTENT_TEXT /*ContentText*/, token: contentText[0] }
+                        this.stack.push(res)
+                        return res
+                    }
+                }
                 this.skipSourceCode(1)
                 let RES_TOKEN_EQUAL = { lineNum: this.lineNum, tokenType: TOKEN_EQUAL, token: "=" }
                 this.stack.push(RES_TOKEN_EQUAL)
                 return RES_TOKEN_EQUAL
             case '"':
+                if (this.isContentText) {
+                    let contentText = /[\s\S]+/.exec(this.sourceCode[0])
+                    if (contentText) {
+                        let res = { lineNum: this.lineNum, tokenType: TOKEN_CONTENT_TEXT /*ContentText*/, token: contentText[0] }
+                        this.stack.push(res)
+                        return res
+                    }
+                }
                 this.skipSourceCode(1)
                 let RES_TOKEN_QUOTE = { lineNum: this.lineNum, tokenType: TOKEN_QUOTE, token: "\"" }
                 this.stack.push(RES_TOKEN_QUOTE)
                 return RES_TOKEN_QUOTE
             case "'":
+                if (this.isContentText) {
+                    let contentText = /[\s\S]+/.exec(this.sourceCode[0])
+                    if (contentText) {
+                        let res = { lineNum: this.lineNum, tokenType: TOKEN_CONTENT_TEXT /*ContentText*/, token: contentText[0] }
+                        this.stack.push(res)
+                        return res
+                    }
+                }
                 this.skipSourceCode(1)
                 let RES_TOKEN_SINGLE_QUOTE = { lineNum: this.lineNum, tokenType: TOKEN_SINGLE_QUOTE, token: "'" }
                 this.stack.push(RES_TOKEN_SINGLE_QUOTE)
                 return RES_TOKEN_SINGLE_QUOTE
             case "/":
+                if (this.isContentText) {
+                    let contentText = /[\s\S]+/.exec(this.sourceCode[0])
+                    if (contentText) {
+                        let res = { lineNum: this.lineNum, tokenType: TOKEN_CONTENT_TEXT /*ContentText*/, token: contentText[0] }
+                        this.stack.push(res)
+                        return res
+                    }
+                }
                 this.skipSourceCode(1)
                 let RES_TOKEN_LEFT_LINE = { lineNum: this.lineNum, tokenType: TOKEN_LEFT_LINE, token: "/" }
                 this.stack.push(RES_TOKEN_LEFT_LINE)
@@ -320,7 +376,7 @@ export class Lexer {
                 return res
             }
         } else {
-            let tag_name = /[a-zA-z]+[0-9]*/.exec(this.sourceCode);
+            let tag_name = regexName.exec(this.sourceCode);
             if (tag_name) {
                 let tag = ""
                 tag = tag_name[0]

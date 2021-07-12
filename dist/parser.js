@@ -33,6 +33,7 @@ function parseStatements(lexer) {
     while (!isSourceCodeEnd(lexer.LookAhead().tokenType)) {
         let statement = {};
         statement = parseStatement(lexer);
+        // console.log(`at line ${lexer.GetLineNum()} ${lexer.sourceCode.slice(0, 30)}`)
         if (!statement)
             continue;
         let stack = statements;
@@ -64,11 +65,13 @@ function parseStatement(lexer) {
     let look = lexer.LookAhead().tokenType;
     let flag = false;
     let top = lexer.stack[lexer.stack.length - 1];
-    if (parseText_1.isClose(lexer) &&
-        top.tokenType !== lexer_1.TOKEN_LEFT_PAREN /*<*/ &&
-        top.tokenType !== lexer_1.TOKEN_CLOSE /*</*/ &&
-        top.tokenType !== lexer_1.TOKEN_DTD /*DTD*/ &&
-        top.tokenType !== lexer_1.COMMENT /*COMMENT*/) {
+    if (top.tokenType === lexer_1.TOKEN_CONTENT_TEXT
+    // isClose(lexer) &&
+    // top.tokenType !== TOKEN_LEFT_PAREN /*<*/ &&
+    // top.tokenType !== TOKEN_CLOSE /*</*/ &&
+    // top.tokenType !== TOKEN_DTD /*DTD*/ &&
+    // top.tokenType !== COMMENT /*COMMENT*/
+    ) {
         flag = true;
     }
     else {

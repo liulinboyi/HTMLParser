@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.NewLexer = exports.Lexer = exports.tokenNameMap = exports.keywords = exports.SourceCharacter = exports.COMMENT = exports.INTERGER = exports.TOKEN_IGNORED = exports.TOKEN_NAME = exports.TOKEN_SELF_CLOSE = exports.TOKEN_DTD = exports.TOKEN_CLOSE = exports.TOKEN_CONTENT_TEXT = exports.TOKEN_DUOQUOTE = exports.TOKEN_LEFT_LINE = exports.TOKEN_SINGLE_QUOTE = exports.TOKEN_QUOTE = exports.TOKEN_EQUAL = exports.TOKEN_RIGHT_PAREN = exports.TOKEN_TAG_NAME = exports.TOKEN_LEFT_PAREN = exports.TOKEN_EOF = exports.Tokens = void 0;
+exports.NewLexer = exports.Lexer = exports.tokenNameMap = exports.keywords = exports.regexName = exports.SourceCharacter = exports.COMMENT = exports.INTERGER = exports.TOKEN_IGNORED = exports.TOKEN_NAME = exports.TOKEN_SELF_CLOSE = exports.TOKEN_DTD = exports.TOKEN_CLOSE = exports.TOKEN_CONTENT_TEXT = exports.TOKEN_DUOQUOTE = exports.TOKEN_LEFT_LINE = exports.TOKEN_SINGLE_QUOTE = exports.TOKEN_QUOTE = exports.TOKEN_EQUAL = exports.TOKEN_RIGHT_PAREN = exports.TOKEN_TAG_NAME = exports.TOKEN_LEFT_PAREN = exports.TOKEN_EOF = exports.Tokens = void 0;
 // token const
 var Tokens;
 (function (Tokens) {
@@ -25,7 +25,7 @@ var Tokens;
 })(Tokens = exports.Tokens || (exports.Tokens = {}));
 exports.TOKEN_EOF = Tokens.TOKEN_EOF, exports.TOKEN_LEFT_PAREN = Tokens.TOKEN_LEFT_PAREN, exports.TOKEN_TAG_NAME = Tokens.TOKEN_TAG_NAME, exports.TOKEN_RIGHT_PAREN = Tokens.TOKEN_RIGHT_PAREN, exports.TOKEN_EQUAL = Tokens.TOKEN_EQUAL, exports.TOKEN_QUOTE = Tokens.TOKEN_QUOTE, exports.TOKEN_SINGLE_QUOTE = Tokens.TOKEN_SINGLE_QUOTE, exports.TOKEN_LEFT_LINE = Tokens.TOKEN_LEFT_LINE, exports.TOKEN_DUOQUOTE = Tokens.TOKEN_DUOQUOTE, exports.TOKEN_CONTENT_TEXT = Tokens.TOKEN_CONTENT_TEXT, exports.TOKEN_CLOSE = Tokens.TOKEN_CLOSE, exports.TOKEN_DTD = Tokens.TOKEN_DTD, exports.TOKEN_SELF_CLOSE = Tokens.TOKEN_SELF_CLOSE, exports.TOKEN_NAME = Tokens.TOKEN_NAME, exports.TOKEN_IGNORED = Tokens.TOKEN_IGNORED, exports.INTERGER = Tokens.INTERGER, exports.COMMENT = Tokens.COMMENT, exports.SourceCharacter = Tokens.SourceCharacter;
 // regex match patterns
-const regexName = /^[_\d\w]+/;
+exports.regexName = /[a-zA-z]+[0-9]*([-_:]*[a-zA-z0-9]*)*/;
 // 关键字
 exports.keywords = {};
 exports.tokenNameMap = {
@@ -66,12 +66,19 @@ class Lexer {
             this.stack[length].tokenType === exports.COMMENT; /*<!---->*/
     }
     get isContentText() {
+        if (this.stack.length < 1) {
+            return true;
+        }
         let origin = this.sourceCode;
         // while (this.stack.length > 10) {
         //     this.stack.shift()
         // }
         if (this.judgeIsContent) {
             this.isIgnored();
+            // <noscript>
+            if (this.stack.length > 2 && this.stack[this.stack.length - 2].token === "noscript") {
+                return true;
+            }
             if (this.sourceCode[0] === "<") {
                 this.sourceCode = origin;
                 return false;
@@ -123,7 +130,7 @@ class Lexer {
         const { lineNum: nowLineNum, tokenType: nowTokenType, token: nowToken } = this.GetNextToken();
         // syntax error
         if (tokenType != nowTokenType) {
-            throw new Error(`NextTokenIs(): syntax error near '${exports.tokenNameMap[nowTokenType]}', expected token: {${exports.tokenNameMap[tokenType]}} but got {${exports.tokenNameMap[nowTokenType]}}.`);
+            throw new Error(`NextTokenIs(): syntax error near '${exports.tokenNameMap[nowTokenType]}', expected token: {${exports.tokenNameMap[tokenType]}} but got {${exports.tokenNameMap[nowTokenType]}}. at line ${this.GetLineNum()} ${this.sourceCode.slice(0, 100)}`);
         }
         return { nowLineNum, nowToken, nowTokenType };
     }
@@ -197,6 +204,14 @@ class Lexer {
         }
         switch (this.sourceCode[0]) {
             case '<':
+                if (this.isContentText) {
+                    let contentText = /[\s\S]+/.exec(this.sourceCode[0]);
+                    if (contentText) {
+                        let res = { lineNum: this.lineNum, tokenType: exports.TOKEN_CONTENT_TEXT /*ContentText*/, token: contentText[0] };
+                        this.stack.push(res);
+                        return res;
+                    }
+                }
                 if (this.sourceCode.slice(0, 4) === "<!--") {
                     this.skipSourceCode(4);
                     let res = { lineNum: this.lineNum, tokenType: exports.COMMENT, token: exports.tokenNameMap[exports.COMMENT] };
@@ -222,26 +237,66 @@ class Lexer {
                     return res;
                 }
             case '>':
+                if (this.isContentText) {
+                    let contentText = /[\s\S]+/.exec(this.sourceCode[0]);
+                    if (contentText) {
+                        let res = { lineNum: this.lineNum, tokenType: exports.TOKEN_CONTENT_TEXT /*ContentText*/, token: contentText[0] };
+                        this.stack.push(res);
+                        return res;
+                    }
+                }
                 this.skipSourceCode(1);
                 let RES_TOKEN_RIGHT_PAREN = { lineNum: this.lineNum, tokenType: exports.TOKEN_RIGHT_PAREN /*>*/, token: ">" };
                 this.stack.push(RES_TOKEN_RIGHT_PAREN);
                 return RES_TOKEN_RIGHT_PAREN;
             case '=': // =
+                if (this.isContentText) {
+                    let contentText = /[\s\S]+/.exec(this.sourceCode[0]);
+                    if (contentText) {
+                        let res = { lineNum: this.lineNum, tokenType: exports.TOKEN_CONTENT_TEXT /*ContentText*/, token: contentText[0] };
+                        this.stack.push(res);
+                        return res;
+                    }
+                }
                 this.skipSourceCode(1);
                 let RES_TOKEN_EQUAL = { lineNum: this.lineNum, tokenType: exports.TOKEN_EQUAL, token: "=" };
                 this.stack.push(RES_TOKEN_EQUAL);
                 return RES_TOKEN_EQUAL;
             case '"':
+                if (this.isContentText) {
+                    let contentText = /[\s\S]+/.exec(this.sourceCode[0]);
+                    if (contentText) {
+                        let res = { lineNum: this.lineNum, tokenType: exports.TOKEN_CONTENT_TEXT /*ContentText*/, token: contentText[0] };
+                        this.stack.push(res);
+                        return res;
+                    }
+                }
                 this.skipSourceCode(1);
                 let RES_TOKEN_QUOTE = { lineNum: this.lineNum, tokenType: exports.TOKEN_QUOTE, token: "\"" };
                 this.stack.push(RES_TOKEN_QUOTE);
                 return RES_TOKEN_QUOTE;
             case "'":
+                if (this.isContentText) {
+                    let contentText = /[\s\S]+/.exec(this.sourceCode[0]);
+                    if (contentText) {
+                        let res = { lineNum: this.lineNum, tokenType: exports.TOKEN_CONTENT_TEXT /*ContentText*/, token: contentText[0] };
+                        this.stack.push(res);
+                        return res;
+                    }
+                }
                 this.skipSourceCode(1);
                 let RES_TOKEN_SINGLE_QUOTE = { lineNum: this.lineNum, tokenType: exports.TOKEN_SINGLE_QUOTE, token: "'" };
                 this.stack.push(RES_TOKEN_SINGLE_QUOTE);
                 return RES_TOKEN_SINGLE_QUOTE;
             case "/":
+                if (this.isContentText) {
+                    let contentText = /[\s\S]+/.exec(this.sourceCode[0]);
+                    if (contentText) {
+                        let res = { lineNum: this.lineNum, tokenType: exports.TOKEN_CONTENT_TEXT /*ContentText*/, token: contentText[0] };
+                        this.stack.push(res);
+                        return res;
+                    }
+                }
                 this.skipSourceCode(1);
                 let RES_TOKEN_LEFT_LINE = { lineNum: this.lineNum, tokenType: exports.TOKEN_LEFT_LINE, token: "/" };
                 this.stack.push(RES_TOKEN_LEFT_LINE);
@@ -256,7 +311,7 @@ class Lexer {
             }
         }
         else {
-            let tag_name = /[a-zA-z]+[0-9]*/.exec(this.sourceCode);
+            let tag_name = exports.regexName.exec(this.sourceCode);
             if (tag_name) {
                 let tag = "";
                 tag = tag_name[0];
