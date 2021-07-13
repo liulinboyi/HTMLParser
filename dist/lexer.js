@@ -202,106 +202,6 @@ class Lexer {
             this.stack.push(res);
             return res;
         }
-        switch (this.sourceCode[0]) {
-            case '<':
-                if (this.isContentText) {
-                    let contentText = /[\s\S]+/.exec(this.sourceCode[0]);
-                    if (contentText) {
-                        let res = { lineNum: this.lineNum, tokenType: exports.TOKEN_CONTENT_TEXT /*ContentText*/, token: contentText[0] };
-                        this.stack.push(res);
-                        return res;
-                    }
-                }
-                if (this.sourceCode.slice(0, 4) === "<!--") {
-                    this.skipSourceCode(4);
-                    let res = { lineNum: this.lineNum, tokenType: exports.COMMENT, token: exports.tokenNameMap[exports.COMMENT] };
-                    this.stack.push(res);
-                    return res;
-                }
-                else if (this.sourceCode[1] === "!") {
-                    this.skipSourceCode(2);
-                    let res = { lineNum: this.lineNum, tokenType: exports.TOKEN_DTD, token: exports.tokenNameMap[exports.TOKEN_DTD] };
-                    this.stack.push(res);
-                    return res;
-                }
-                else if (this.isTagNmae()) {
-                    this.skipSourceCode(1);
-                    let res = { lineNum: this.lineNum, tokenType: exports.TOKEN_LEFT_PAREN, token: "<" };
-                    this.stack.push(res);
-                    return res;
-                }
-                else {
-                    this.skipSourceCode(2);
-                    let res = { lineNum: this.lineNum, tokenType: exports.TOKEN_CLOSE, token: "</" };
-                    this.stack.push(res);
-                    return res;
-                }
-            case '>':
-                if (this.isContentText) {
-                    let contentText = /[\s\S]+/.exec(this.sourceCode[0]);
-                    if (contentText) {
-                        let res = { lineNum: this.lineNum, tokenType: exports.TOKEN_CONTENT_TEXT /*ContentText*/, token: contentText[0] };
-                        this.stack.push(res);
-                        return res;
-                    }
-                }
-                this.skipSourceCode(1);
-                let RES_TOKEN_RIGHT_PAREN = { lineNum: this.lineNum, tokenType: exports.TOKEN_RIGHT_PAREN /*>*/, token: ">" };
-                this.stack.push(RES_TOKEN_RIGHT_PAREN);
-                return RES_TOKEN_RIGHT_PAREN;
-            case '=': // =
-                if (this.isContentText) {
-                    let contentText = /[\s\S]+/.exec(this.sourceCode[0]);
-                    if (contentText) {
-                        let res = { lineNum: this.lineNum, tokenType: exports.TOKEN_CONTENT_TEXT /*ContentText*/, token: contentText[0] };
-                        this.stack.push(res);
-                        return res;
-                    }
-                }
-                this.skipSourceCode(1);
-                let RES_TOKEN_EQUAL = { lineNum: this.lineNum, tokenType: exports.TOKEN_EQUAL, token: "=" };
-                this.stack.push(RES_TOKEN_EQUAL);
-                return RES_TOKEN_EQUAL;
-            case '"':
-                if (this.isContentText) {
-                    let contentText = /[\s\S]+/.exec(this.sourceCode[0]);
-                    if (contentText) {
-                        let res = { lineNum: this.lineNum, tokenType: exports.TOKEN_CONTENT_TEXT /*ContentText*/, token: contentText[0] };
-                        this.stack.push(res);
-                        return res;
-                    }
-                }
-                this.skipSourceCode(1);
-                let RES_TOKEN_QUOTE = { lineNum: this.lineNum, tokenType: exports.TOKEN_QUOTE, token: "\"" };
-                this.stack.push(RES_TOKEN_QUOTE);
-                return RES_TOKEN_QUOTE;
-            case "'":
-                if (this.isContentText) {
-                    let contentText = /[\s\S]+/.exec(this.sourceCode[0]);
-                    if (contentText) {
-                        let res = { lineNum: this.lineNum, tokenType: exports.TOKEN_CONTENT_TEXT /*ContentText*/, token: contentText[0] };
-                        this.stack.push(res);
-                        return res;
-                    }
-                }
-                this.skipSourceCode(1);
-                let RES_TOKEN_SINGLE_QUOTE = { lineNum: this.lineNum, tokenType: exports.TOKEN_SINGLE_QUOTE, token: "'" };
-                this.stack.push(RES_TOKEN_SINGLE_QUOTE);
-                return RES_TOKEN_SINGLE_QUOTE;
-            case "/":
-                if (this.isContentText) {
-                    let contentText = /[\s\S]+/.exec(this.sourceCode[0]);
-                    if (contentText) {
-                        let res = { lineNum: this.lineNum, tokenType: exports.TOKEN_CONTENT_TEXT /*ContentText*/, token: contentText[0] };
-                        this.stack.push(res);
-                        return res;
-                    }
-                }
-                this.skipSourceCode(1);
-                let RES_TOKEN_LEFT_LINE = { lineNum: this.lineNum, tokenType: exports.TOKEN_LEFT_LINE, token: "/" };
-                this.stack.push(RES_TOKEN_LEFT_LINE);
-                return RES_TOKEN_LEFT_LINE;
-        }
         if (this.isContentText) {
             let contentText = /[\s\S]+/.exec(this.sourceCode[0]);
             if (contentText) {
@@ -311,6 +211,58 @@ class Lexer {
             }
         }
         else {
+            switch (this.sourceCode[0]) {
+                case '<':
+                    if (this.sourceCode.slice(0, 4) === "<!--") {
+                        this.skipSourceCode(4);
+                        let res = { lineNum: this.lineNum, tokenType: exports.COMMENT, token: exports.tokenNameMap[exports.COMMENT] };
+                        this.stack.push(res);
+                        return res;
+                    }
+                    else if (this.sourceCode[1] === "!") {
+                        this.skipSourceCode(2);
+                        let res = { lineNum: this.lineNum, tokenType: exports.TOKEN_DTD, token: exports.tokenNameMap[exports.TOKEN_DTD] };
+                        this.stack.push(res);
+                        return res;
+                    }
+                    else if (this.isTagNmae()) {
+                        this.skipSourceCode(1);
+                        let res = { lineNum: this.lineNum, tokenType: exports.TOKEN_LEFT_PAREN, token: "<" };
+                        this.stack.push(res);
+                        return res;
+                    }
+                    else {
+                        this.skipSourceCode(2);
+                        let res = { lineNum: this.lineNum, tokenType: exports.TOKEN_CLOSE, token: "</" };
+                        this.stack.push(res);
+                        return res;
+                    }
+                case '>':
+                    this.skipSourceCode(1);
+                    let RES_TOKEN_RIGHT_PAREN = { lineNum: this.lineNum, tokenType: exports.TOKEN_RIGHT_PAREN /*>*/, token: ">" };
+                    this.stack.push(RES_TOKEN_RIGHT_PAREN);
+                    return RES_TOKEN_RIGHT_PAREN;
+                case '=': // =
+                    this.skipSourceCode(1);
+                    let RES_TOKEN_EQUAL = { lineNum: this.lineNum, tokenType: exports.TOKEN_EQUAL, token: "=" };
+                    this.stack.push(RES_TOKEN_EQUAL);
+                    return RES_TOKEN_EQUAL;
+                case '"':
+                    this.skipSourceCode(1);
+                    let RES_TOKEN_QUOTE = { lineNum: this.lineNum, tokenType: exports.TOKEN_QUOTE, token: "\"" };
+                    this.stack.push(RES_TOKEN_QUOTE);
+                    return RES_TOKEN_QUOTE;
+                case "'":
+                    this.skipSourceCode(1);
+                    let RES_TOKEN_SINGLE_QUOTE = { lineNum: this.lineNum, tokenType: exports.TOKEN_SINGLE_QUOTE, token: "'" };
+                    this.stack.push(RES_TOKEN_SINGLE_QUOTE);
+                    return RES_TOKEN_SINGLE_QUOTE;
+                case "/":
+                    this.skipSourceCode(1);
+                    let RES_TOKEN_LEFT_LINE = { lineNum: this.lineNum, tokenType: exports.TOKEN_LEFT_LINE, token: "/" };
+                    this.stack.push(RES_TOKEN_LEFT_LINE);
+                    return RES_TOKEN_LEFT_LINE;
+            }
             let tag_name = exports.regexName.exec(this.sourceCode);
             if (tag_name) {
                 let tag = "";

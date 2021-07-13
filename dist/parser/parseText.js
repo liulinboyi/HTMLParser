@@ -38,6 +38,25 @@ function isClose(lexer) {
     return one || close || selfClose;
 }
 exports.isClose = isClose;
+function judgeEnd(lexer) {
+    if (lexer.sourceCode.slice(0, 2) === "</" /*<div>contentText</div>*/ ||
+        lexer.sourceCode.slice(0, 2) === "<!" /*<meta>contentText<!----> || <!DOCTYPE*/ ||
+        (lexer.sourceCode[0] === "<" &&
+            lexer_1.regexName.test(lexer.sourceCode[1])) /*<div>contentText<div>*/) {
+        return false;
+    }
+    else {
+        /*<div>contentText<br />*/
+        if ((lexer.sourceCode[0] === "<"
+            && lexer_1.regexName.test(lexer.sourceCode[1]))) {
+            let parseRes = Html_1.parseHtml(lexer);
+            if (parseRes.selfClose) {
+                return false;
+            }
+        }
+        return true;
+    }
+}
 function contentEnd(lexer) {
     // <div>contentText</div>
     // <div>contentText<div>
@@ -80,23 +99,7 @@ function contentEnd(lexer) {
                 return true;
             }
         }
-        if (lexer.sourceCode.slice(0, 2) === "</" /*<div>contentText</div>*/ ||
-            lexer.sourceCode.slice(0, 2) === "<!" /*<meta>contentText<!----> || <!DOCTYPE*/ ||
-            (lexer.sourceCode[0] === "<" &&
-                lexer_1.regexName.test(lexer.sourceCode[1])) /*<div>contentText<div>*/) {
-            return false;
-        }
-        else {
-            /*<div>contentText<br />*/
-            if ((lexer.sourceCode[0] === "<"
-                && lexer_1.regexName.test(lexer.sourceCode[1]))) {
-                let parseRes = Html_1.parseHtml(lexer);
-                if (parseRes.selfClose) {
-                    return false;
-                }
-            }
-            return true;
-        }
+        judgeEnd(lexer);
     }
     // </div>contentText<div>
     // </div>contentText<!---->
@@ -107,23 +110,7 @@ function contentEnd(lexer) {
         stack[length - 2].tokenType === lexer_1.TOKEN_RIGHT_PAREN /*>*/ &&
         stack[length - 3].tokenType === lexer_1.TOKEN_NAME /*name*/ &&
         stack[length - 4].tokenType === lexer_1.TOKEN_CLOSE /*</*/) {
-        if ((lexer.sourceCode[0] === "<" &&
-            lexer_1.regexName.test(lexer.sourceCode[1])) /*</div>contentText<div>*/ ||
-            lexer.sourceCode.slice(0, 2) === "<!" /*</div>contentText<!----> || <!DOCTYPE*/ ||
-            lexer.sourceCode.slice(0, 2) === "</" /*</div>contentText</div>*/) {
-            return false;
-        }
-        else {
-            /*</div>contentText<br />*/
-            if ((lexer.sourceCode[0] === "<"
-                && lexer_1.regexName.test(lexer.sourceCode[1]))) {
-                let parseRes = Html_1.parseHtml(lexer);
-                if (parseRes.selfClose) {
-                    return false;
-                }
-            }
-            return true;
-        }
+        judgeEnd(lexer);
     }
     // <br />contentText<div>
     // <br />contentText<!---->
@@ -134,23 +121,7 @@ function contentEnd(lexer) {
         stack[length - 2].tokenType === lexer_1.TOKEN_SELF_CLOSE /*self-close /> <br />*/ &&
         stack[length - 3].tokenType === lexer_1.TOKEN_NAME /*name*/ &&
         stack[length - 4].tokenType === lexer_1.TOKEN_LEFT_PAREN /*<*/) {
-        if ((lexer.sourceCode[0] === "<"
-            && lexer_1.regexName.test(lexer.sourceCode[1])) /*<br />contentText<div>*/ ||
-            lexer.sourceCode.slice(0, 2) === "<!" /*<br />contentText<!----> || <!DOCTYPE*/ ||
-            lexer.sourceCode.slice(0, 2) === "</" /*<br />contentText</div>*/) {
-            return false;
-        }
-        else {
-            /*<br />contentText<br />*/
-            if ((lexer.sourceCode[0] === "<"
-                && lexer_1.regexName.test(lexer.sourceCode[1]))) {
-                let parseRes = Html_1.parseHtml(lexer);
-                if (parseRes.selfClose) {
-                    return false;
-                }
-            }
-            return true;
-        }
+        judgeEnd(lexer);
     }
     // <!---->contentText<div>
     // <!---->contentText<!---->
@@ -158,23 +129,7 @@ function contentEnd(lexer) {
     // <!---->contentText<br />
     if (isClose(lexer) &&
         stack[length - 2].tokenType === lexer_1.COMMENT /*COMMENT*/) {
-        if ((lexer.sourceCode[0] === "<" &&
-            lexer_1.regexName.test(lexer.sourceCode[1])) /*<!---->contentText<div>*/ ||
-            lexer.sourceCode.slice(0, 2) === "<!" /*<!---->contentText<!----> || <!DOCTYPE*/ ||
-            lexer.sourceCode.slice(0, 2) === "</" /*<!---->contentText</div>*/) {
-            return false;
-        }
-        else {
-            /*<!---->contentText<br />*/
-            if ((lexer.sourceCode[0] === "<"
-                && lexer_1.regexName.test(lexer.sourceCode[1]))) {
-                let parseRes = Html_1.parseHtml(lexer);
-                if (parseRes.selfClose) {
-                    return false;
-                }
-            }
-            return true;
-        }
+        judgeEnd(lexer);
     }
     // <!DOCTYPE html>contentText<div>
     // <!DOCTYPE html>contentText</div>
@@ -182,25 +137,13 @@ function contentEnd(lexer) {
     // <!DOCTYPE html>contentText<br />
     if (isClose(lexer) &&
         stack[length - 2].tokenType === lexer_1.TOKEN_DTD /*DTD*/) {
-        if ((lexer.sourceCode[0] === "<" &&
-            lexer_1.regexName.test(lexer.sourceCode[1])) /*<!DOCTYPE html>contentText<div>*/ ||
-            lexer.sourceCode.slice(0, 2) === "<!" /*<!DOCTYPE html>contentText<!----> || <!DOCTYPE*/ ||
-            lexer.sourceCode.slice(0, 2) === "</" /*<!DOCTYPE html>contentText</div>*/) {
-            return false;
-        }
-        else {
-            /*<!DOCTYPE html>contentText<br />*/
-            if ((lexer.sourceCode[0] === "<"
-                && lexer_1.regexName.test(lexer.sourceCode[1]))) {
-                let parseRes = Html_1.parseHtml(lexer);
-                if (parseRes.selfClose) {
-                    return false;
-                }
-            }
-            return true;
-        }
+        judgeEnd(lexer);
     }
-    if (stack[length - 1].tokenType === lexer_1.TOKEN_CONTENT_TEXT) {
+    /*contentText<div>*/
+    /*contentText<!----> || <!DOCTYPE*/
+    /*contentText</div>*/
+    /*contentText<br />*/
+    if (stack[length - 1].tokenType === lexer_1.TOKEN_CONTENT_TEXT /*contentText*/) {
         if ((lexer.sourceCode[0] === "<" &&
             lexer_1.regexName.test(lexer.sourceCode[1])) /*contentText<div>*/ ||
             lexer.sourceCode.slice(0, 2) === "<!" /*contentText<!----> || <!DOCTYPE*/ ||

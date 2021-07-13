@@ -1,6 +1,6 @@
-import { COMMENT, Lexer, NewLexer, tokenNameMap, TOKEN_CLOSE, TOKEN_CONTENT_TEXT, TOKEN_DTD, TOKEN_DUOQUOTE, TOKEN_EOF, TOKEN_IGNORED, TOKEN_LEFT_PAREN, TOKEN_NAME, TOKEN_QUOTE } from "./lexer"
+import { COMMENT, Lexer, NewLexer, TOKEN_CLOSE, TOKEN_CONTENT_TEXT, TOKEN_DTD, TOKEN_EOF, TOKEN_IGNORED, TOKEN_LEFT_PAREN } from "./lexer"
 import { parseHtml } from "./parser/Html"
-import { isClose, parseText } from "./parser/parseText"
+import { parseText } from "./parser/parseText"
 import { isSpecialTag, parseClose } from "./parser/tagClose"
 import { parseDtd } from "./parser/DTD"
 import { paseComment } from "./parser/Comment"
