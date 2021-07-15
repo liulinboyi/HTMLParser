@@ -48,15 +48,18 @@ export function isClose(lexer: Lexer) {
     return one || close || selfClose;
 }
 
+/*
+提取出来的公共代码
+*/
 function judgeEnd(lexer: Lexer) {
-    if (lexer.sourceCode.slice(0, 2) === "</" /*<div>contentText</div>*/ ||
-        lexer.sourceCode.slice(0, 2) === "<!" /*<meta>contentText<!----> || <!DOCTYPE*/ ||
+    if (lexer.sourceCode.slice(0, 2) === "</" /*在这里是什么特征看调用函数的注释部分contentText</div>*/ ||
+        lexer.sourceCode.slice(0, 2) === "<!" /*在这里是什么特征看调用函数的注释部分contentText<!----> || <!DOCTYPE*/ ||
         (lexer.sourceCode[0] === "<" &&
-            regexName.test(lexer.sourceCode[1])) /*<div>contentText<div>*/
+            regexName.test(lexer.sourceCode[1])) /*在这里是什么特征看调用函数的注释部分contentText<div>*/
     ) {
         return false
     } else {
-        /*<div>contentText<br />*/
+        /*在这里是什么特征看调用函数的注释部分contentText<br />*/
         if ((lexer.sourceCode[0] === "<"
             && regexName.test(lexer.sourceCode[1]))) {
             let parseRes = parseHtml(lexer)
