@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.parseHtml = exports.parseAttr = exports.parseDoubleQuotedAttr = exports.parseSingleQuotedAttr = exports.parseValue = exports.parseName = exports.parseTag = exports.Node = void 0;
+exports.parseHtml = exports.parseAttr = exports.parseDoubleQuotedAttr = exports.parseSingleQuotedAttr = exports.parseString = exports.parseValue = exports.parseName = exports.parseTag = exports.Node = void 0;
 const lexer_1 = require("../lexer");
 class Node {
     constructor() {
@@ -13,11 +13,22 @@ function parseTag(lexer) {
     return lexer.NextTokenIs(lexer_1.TOKEN_NAME).nowToken; // tag_name
 }
 exports.parseTag = parseTag;
-function parseName(lexer) {
+function parseName(lexer, node) {
     let attrReg = /[^\s"'>/=[\u0000-\u001f]+/.exec(lexer.sourceCode);
     let name = "";
     if (attrReg) {
         name = attrReg[0];
+    }
+    if (name.includes("<")) {
+        /*
+        <a name="xiaoming"
+            <p class="cf">
+
+            </p>
+        
+        暂时当做selfClose标签处理
+        */
+        node.selfClose = true;
     }
     lexer.skipSourceCode(name.length);
     return name;
@@ -36,8 +47,25 @@ function parseValue(lexer) {
     else if (lexer.sourceCode[0] === '"') {
         return parseDoubleQuotedAttr(lexer);
     }
+    else {
+        return parseString(lexer);
+    }
 }
 exports.parseValue = parseValue;
+function parseString(lexer) {
+    let value = "";
+    // lexer.NextTokenIs(TOKEN_SINGLE_QUOTE);
+    // lexer.stack.pop()
+    let res = /[^\s><]*/.exec(lexer.sourceCode);
+    if (res) {
+        value = res[0];
+    }
+    lexer.skipSourceCode(value.length);
+    // lexer.NextTokenIs(TOKEN_SINGLE_QUOTE);
+    // lexer.stack.pop()
+    return value;
+}
+exports.parseString = parseString;
 function parseSingleQuotedAttr(lexer) {
     let value = "";
     lexer.NextTokenIs(lexer_1.TOKEN_SINGLE_QUOTE);
@@ -66,9 +94,10 @@ function parseDoubleQuotedAttr(lexer) {
     return value;
 }
 exports.parseDoubleQuotedAttr = parseDoubleQuotedAttr;
-function parseAttr(lexer) {
+function parseAttr(lexer, node) {
     let attrItem = {};
-    let tag = parseName(lexer);
+    lexer.isIgnored(); // 空格
+    let tag = parseName(lexer, node);
     if (tag) {
         let attr = tag;
         attrItem = genereteAttr(attr); // name
@@ -112,7 +141,17 @@ function parseHtml(lexer) {
     node.tag = parseTag(lexer);
     lexer.isIgnored();
     while (checkAttrEnd(lexer, node)) {
-        let res = parseAttr(lexer);
+        if (lexer.nextSourceCodeIs("\r\n") || lexer.nextSourceCodeIs("\n\r")) {
+            lexer.lineNum += 1;
+            lexer.skipSourceCode(2);
+        }
+        else {
+            if (lexer.isNewLine(lexer.sourceCode[0])) {
+                lexer.lineNum += 1;
+                lexer.skipSourceCode(1);
+            }
+        }
+        let res = parseAttr(lexer, node);
         node.attr.push(res);
     }
     lexer.isIgnored();

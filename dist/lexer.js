@@ -25,7 +25,7 @@ var Tokens;
 })(Tokens = exports.Tokens || (exports.Tokens = {}));
 exports.TOKEN_EOF = Tokens.TOKEN_EOF, exports.TOKEN_LEFT_PAREN = Tokens.TOKEN_LEFT_PAREN, exports.TOKEN_TAG_NAME = Tokens.TOKEN_TAG_NAME, exports.TOKEN_RIGHT_PAREN = Tokens.TOKEN_RIGHT_PAREN, exports.TOKEN_EQUAL = Tokens.TOKEN_EQUAL, exports.TOKEN_QUOTE = Tokens.TOKEN_QUOTE, exports.TOKEN_SINGLE_QUOTE = Tokens.TOKEN_SINGLE_QUOTE, exports.TOKEN_LEFT_LINE = Tokens.TOKEN_LEFT_LINE, exports.TOKEN_DUOQUOTE = Tokens.TOKEN_DUOQUOTE, exports.TOKEN_CONTENT_TEXT = Tokens.TOKEN_CONTENT_TEXT, exports.TOKEN_CLOSE = Tokens.TOKEN_CLOSE, exports.TOKEN_DTD = Tokens.TOKEN_DTD, exports.TOKEN_SELF_CLOSE = Tokens.TOKEN_SELF_CLOSE, exports.TOKEN_NAME = Tokens.TOKEN_NAME, exports.TOKEN_IGNORED = Tokens.TOKEN_IGNORED, exports.INTERGER = Tokens.INTERGER, exports.COMMENT = Tokens.COMMENT, exports.SourceCharacter = Tokens.SourceCharacter;
 // regex match patterns
-exports.regexName = /[a-zA-z]+[0-9]*([-_:]*[a-zA-z0-9]*)*/;
+exports.regexName = /^[a-zA-z]+[0-9]*([-_:']*[a-zA-z0-9]*)*/;
 // 关键字
 exports.keywords = {};
 exports.tokenNameMap = {
@@ -63,10 +63,14 @@ class Lexer {
         return this.stack[length].tokenType === exports.TOKEN_RIGHT_PAREN /*>*/ ||
             this.stack[length].tokenType === exports.TOKEN_SELF_CLOSE /*/> <br />*/ ||
             this.stack[length].tokenType === exports.TOKEN_DTD /*dtd*/ ||
-            this.stack[length].tokenType === exports.COMMENT; /*<!---->*/
+            this.stack[length].tokenType === exports.COMMENT /*<!---->*/ ||
+            this.stack[length].tokenType === exports.TOKEN_CONTENT_TEXT; /*ContentText*/
     }
     get isContentText() {
         if (this.stack.length < 1) {
+            if (this.sourceCode[0] === "<") {
+                return false;
+            }
             return true;
         }
         let origin = this.sourceCode;
@@ -167,11 +171,11 @@ class Lexer {
     isTagNmae() {
         let origin = this.sourceCode;
         this.skipSourceCode(1);
-        if (this.sourceCode[0] === "/") {
-            this.sourceCode = origin;
-            return false;
-        }
-        let tag_name = /[a-zA-z]+[0-9]*/.exec(this.sourceCode);
+        // if (this.sourceCode[0] === "/") {
+        //     this.sourceCode = origin
+        //     return false
+        // }
+        let tag_name = exports.regexName.exec(this.sourceCode);
         if (tag_name) {
             let tag = tag_name[0];
             this.skipSourceCode(tag.length);
@@ -185,6 +189,10 @@ class Lexer {
                 this.sourceCode = origin;
                 return true;
             }
+        }
+        else {
+            this.sourceCode = origin;
+            return false;
         }
     }
     // 匹配Token并跳过匹配的Token
@@ -231,11 +239,19 @@ class Lexer {
                         this.stack.push(res);
                         return res;
                     }
-                    else {
+                    else if (this.sourceCode[1] === "/") {
                         this.skipSourceCode(2);
                         let res = { lineNum: this.lineNum, tokenType: exports.TOKEN_CLOSE, token: "</" };
                         this.stack.push(res);
                         return res;
+                    }
+                    else {
+                        let contentText = /[\s\S]+/.exec(this.sourceCode[0]);
+                        if (contentText) {
+                            let res = { lineNum: this.lineNum, tokenType: exports.TOKEN_CONTENT_TEXT /*ContentText*/, token: contentText[0] };
+                            this.stack.push(res);
+                            return res;
+                        }
                     }
                 case '>':
                     this.skipSourceCode(1);

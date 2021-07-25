@@ -1,4 +1,5 @@
 import { Lexer, TOKEN_EQUAL, TOKEN_LEFT_PAREN, TOKEN_NAME, TOKEN_QUOTE, TOKEN_RIGHT_PAREN, TOKEN_SELF_CLOSE, TOKEN_SINGLE_QUOTE } from "../lexer";
+import { parseText } from "./parseText";
 
 export interface Node {
     LineNum?: number,
@@ -20,11 +21,22 @@ export function parseTag(lexer: Lexer) {
     return lexer.NextTokenIs(TOKEN_NAME).nowToken; // tag_name
 }
 
-export function parseName(lexer: Lexer) {
+export function parseName(lexer: Lexer, node: any) {
     let attrReg = /[^\s"'>/=[\u0000-\u001f]+/.exec(lexer.sourceCode)
     let name = ""
     if (attrReg) {
         name = attrReg[0]
+    }
+    if (name.includes("<")) {
+        /*
+        <a name="xiaoming"
+            <p class="cf">
+
+            </p>
+        
+        暂时当做selfClose标签处理
+        */
+        node.selfClose = true
     }
     lexer.skipSourceCode(name.length)
     return name
@@ -42,7 +54,23 @@ export function parseValue(lexer: Lexer) {
         return parseSingleQuotedAttr(lexer)
     } else if (lexer.sourceCode[0] === '"') {
         return parseDoubleQuotedAttr(lexer)
+    } else {
+        return parseString(lexer)
     }
+}
+
+export function parseString(lexer: Lexer) {
+    let value = ""
+    // lexer.NextTokenIs(TOKEN_SINGLE_QUOTE);
+    // lexer.stack.pop()
+    let res = /[^\s><]*/.exec(lexer.sourceCode)
+    if (res) {
+        value = res[0]
+    }
+    lexer.skipSourceCode(value.length)
+    // lexer.NextTokenIs(TOKEN_SINGLE_QUOTE);
+    // lexer.stack.pop()
+    return value
 }
 
 export function parseSingleQuotedAttr(lexer: Lexer) {
@@ -73,12 +101,13 @@ export function parseDoubleQuotedAttr(lexer: Lexer) {
     return value
 }
 
-export function parseAttr(lexer: Lexer) {
+export function parseAttr(lexer: Lexer, node: any) {
     let attrItem: {
         name?: string,
         value?: string,
     } = {}
-    let tag = parseName(lexer)
+    lexer.isIgnored(); // 空格
+    let tag = parseName(lexer, node)
     if (tag) {
         let attr = tag
         attrItem = genereteAttr(attr); // name
@@ -121,7 +150,16 @@ export function parseHtml(lexer: Lexer) {
     node.tag = parseTag(lexer)
     lexer.isIgnored()
     while (checkAttrEnd(lexer, node)) {
-        let res = parseAttr(lexer)
+        if (lexer.nextSourceCodeIs("\r\n") || lexer.nextSourceCodeIs("\n\r")) {
+            lexer.lineNum += 1
+            lexer.skipSourceCode(2)
+        } else {
+            if (lexer.isNewLine(lexer.sourceCode[0])) {
+                lexer.lineNum += 1
+                lexer.skipSourceCode(1)
+            }
+        }
+        let res = parseAttr(lexer, node)
         node.attr.push(res)
     }
     lexer.isIgnored()

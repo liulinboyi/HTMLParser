@@ -83,7 +83,7 @@ export const {
 } = Tokens
 
 // regex match patterns
-export const regexName = /[a-zA-z]+[0-9]*([-_:]*[a-zA-z0-9]*)*/
+export const regexName = /^[a-zA-z]+[0-9]*([-_:']*[a-zA-z0-9]*)*/
 
 // 关键字
 export const keywords: Keywords = {
@@ -126,11 +126,15 @@ export class Lexer {
         return this.stack[length].tokenType === TOKEN_RIGHT_PAREN /*>*/ ||
             this.stack[length].tokenType === TOKEN_SELF_CLOSE /*/> <br />*/ ||
             this.stack[length].tokenType === TOKEN_DTD /*dtd*/ ||
-            this.stack[length].tokenType === COMMENT /*<!---->*/
+            this.stack[length].tokenType === COMMENT /*<!---->*/ ||
+            this.stack[length].tokenType === TOKEN_CONTENT_TEXT /*ContentText*/
     }
 
     get isContentText() {
         if (this.stack.length < 1) {
+            if (this.sourceCode[0] === "<") {
+                return false
+            }
             return true
         }
 
@@ -234,11 +238,11 @@ export class Lexer {
     isTagNmae() {
         let origin = this.sourceCode;
         this.skipSourceCode(1)
-        if (this.sourceCode[0] === "/") {
-            this.sourceCode = origin
-            return false
-        }
-        let tag_name = /[a-zA-z]+[0-9]*/.exec(this.sourceCode);
+        // if (this.sourceCode[0] === "/") {
+        //     this.sourceCode = origin
+        //     return false
+        // }
+        let tag_name = regexName.exec(this.sourceCode);
         if (tag_name) {
             let tag = tag_name[0]
             this.skipSourceCode(tag.length);
@@ -251,6 +255,9 @@ export class Lexer {
                 this.sourceCode = origin
                 return true
             }
+        } else {
+            this.sourceCode = origin
+            return false
         }
     }
     // 匹配Token并跳过匹配的Token
@@ -296,11 +303,18 @@ export class Lexer {
                         let res = { lineNum: this.lineNum, tokenType: TOKEN_LEFT_PAREN, token: "<" }
                         this.stack.push(res)
                         return res
-                    } else {
+                    } else if (this.sourceCode[1] === "/") {
                         this.skipSourceCode(2)
                         let res = { lineNum: this.lineNum, tokenType: TOKEN_CLOSE, token: "</" }
                         this.stack.push(res)
                         return res
+                    } else {
+                        let contentText = /[\s\S]+/.exec(this.sourceCode[0])
+                        if (contentText) {
+                            let res = { lineNum: this.lineNum, tokenType: TOKEN_CONTENT_TEXT /*ContentText*/, token: contentText[0] }
+                            this.stack.push(res)
+                            return res
+                        }
                     }
                 case '>':
                     this.skipSourceCode(1)

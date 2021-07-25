@@ -38,15 +38,18 @@ function isClose(lexer) {
     return one || close || selfClose;
 }
 exports.isClose = isClose;
+/*
+提取出来的公共代码
+*/
 function judgeEnd(lexer) {
-    if (lexer.sourceCode.slice(0, 2) === "</" /*<div>contentText</div>*/ ||
-        lexer.sourceCode.slice(0, 2) === "<!" /*<meta>contentText<!----> || <!DOCTYPE*/ ||
+    if (lexer.sourceCode.slice(0, 2) === "</" /*在这里是什么特征看调用函数的注释部分contentText</div>*/ ||
+        lexer.sourceCode.slice(0, 2) === "<!" /*在这里是什么特征看调用函数的注释部分contentText<!----> || <!DOCTYPE*/ ||
         (lexer.sourceCode[0] === "<" &&
-            lexer_1.regexName.test(lexer.sourceCode[1])) /*<div>contentText<div>*/) {
+            lexer_1.regexName.test(lexer.sourceCode[1])) /*在这里是什么特征看调用函数的注释部分contentText<div>*/) {
         return false;
     }
     else {
-        /*<div>contentText<br />*/
+        /*在这里是什么特征看调用函数的注释部分contentText<br />*/
         if ((lexer.sourceCode[0] === "<"
             && lexer_1.regexName.test(lexer.sourceCode[1]))) {
             let parseRes = Html_1.parseHtml(lexer);
@@ -165,25 +168,39 @@ function contentEnd(lexer) {
     // return true
     throw new Error(`not find contentEnd! at line ${lexer.GetLineNum()} ${lexer.sourceCode.slice(0, 100)}`);
 }
-let newLine = 0; // 统计换行个数
-let leftLine = 0; // 剩余行数
 function parseText(lexer) {
     lexer.hasCache = false;
     let node = new Node();
+    lexer.isIgnored();
+    node.LineNum = lexer.GetLineNum();
     let content = "";
     while (contentEnd(lexer) && !lexer.isEmpty()) {
         if (lexer.nextSourceCodeIs("\r\n") || lexer.nextSourceCodeIs("\n\r")) {
             lexer.lineNum += 1;
-            newLine++;
             content += lexer.sourceCode.slice(0, 2);
             lexer.skipSourceCode(2);
+            const length = lexer.stack.length;
+            if (length >= 3) {
+                let token = lexer.stack[length - 3].token;
+                if (token === "script" || token === "noscript") {
+                    continue;
+                }
+            }
+            break;
         }
         else {
             if (lexer.isNewLine(lexer.sourceCode[0])) {
                 lexer.lineNum += 1;
-                newLine++;
                 content += lexer.sourceCode[0];
                 lexer.skipSourceCode(1);
+                const length = lexer.stack.length;
+                if (length >= 3) {
+                    let token = lexer.stack[length - 3].token;
+                    if (token === "script" || token === "noscript") {
+                        continue;
+                    }
+                }
+                break;
             }
             else {
                 content += lexer.sourceCode[0];
@@ -191,18 +208,8 @@ function parseText(lexer) {
             }
         }
     }
-    if (newLine >= 2) {
-        leftLine = newLine - 1;
-        lexer.lineNum -= 1;
-        newLine = 0; // reset
-    }
     lexer.isIgnored();
     node.content = content;
-    node.LineNum = lexer.GetLineNum();
-    if (leftLine > 0) { // 如果有剩余行数，在当前节点已经设置lineNum之后，加回去
-        lexer.lineNum += leftLine;
-        leftLine = 0; // reset
-    }
     node.type = "text";
     return node;
 }

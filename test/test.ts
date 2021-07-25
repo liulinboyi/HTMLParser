@@ -40,6 +40,10 @@ let paths = [
     "0475e5eeadaaca857eea3f36d0eda01937fe672d48be7f98ba6bc7f25ecd63d0.html",
     "078cdb456d1beb698aeed86e0f2161e442e9431c4580295f1ba4ece22741068c.html",
     "0e55dcdbeb54c88ee87942b9fef7ea5398fa9a1e83493d55844b479506a80fd8.html",
+    "qidian.html",
+    "test24.html",
+    "test25.html",
+    "test26.html",
 ]
 
 for (let p of paths) {
