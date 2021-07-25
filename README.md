@@ -36,7 +36,7 @@
         },
         {
             "content": "\r\n",
-            "LineNum": 2,
+            "LineNum": 1,
             "type": "text"
         },
         {
@@ -49,8 +49,8 @@
                 {
                     "children": [
                         {
-                            "content": "\r\n    ",
-                            "LineNum": 4,
+                            "content": "\r\n",
+                            "LineNum": 3,
                             "type": "text"
                         },
                         {
@@ -66,7 +66,7 @@
                             "tag": "meta"
                         },
                         {
-                            "content": "\r\n    ",
+                            "content": "\r\n",
                             "LineNum": 4,
                             "type": "text"
                         },
@@ -87,8 +87,8 @@
                             "tag": "meta"
                         },
                         {
-                            "content": "\r\n    ",
-                            "LineNum": 6,
+                            "content": "\r\n",
+                            "LineNum": 5,
                             "type": "text"
                         },
                         {
@@ -108,7 +108,7 @@
                             "tag": "meta"
                         },
                         {
-                            "content": "\r\n    ",
+                            "content": "\r\n",
                             "LineNum": 6,
                             "type": "text"
                         },
@@ -127,7 +127,7 @@
                         },
                         {
                             "content": "\r\n",
-                            "LineNum": 8,
+                            "LineNum": 7,
                             "type": "text"
                         }
                     ],
@@ -144,14 +144,14 @@
                 {
                     "children": [
                         {
-                            "content": "\r\n    ",
-                            "LineNum": 10,
+                            "content": "\r\n",
+                            "LineNum": 9,
                             "type": "text"
                         },
                         {
                             "children": [
                                 {
-                                    "content": "\r\n        ",
+                                    "content": "\r\n",
                                     "LineNum": 10,
                                     "type": "text"
                                 },
@@ -182,8 +182,8 @@
                                     "tag": "h1"
                                 },
                                 {
-                                    "content": "\r\n    ",
-                                    "LineNum": 12,
+                                    "content": "\r\n",
+                                    "LineNum": 11,
                                     "type": "text"
                                 }
                             ],
@@ -193,7 +193,7 @@
                             "tag": "div"
                         },
                         {
-                            "content": "\r\n    ",
+                            "content": "\r\n",
                             "LineNum": 12,
                             "type": "text"
                         },
@@ -211,7 +211,7 @@
                         },
                         {
                             "content": "\r\n",
-                            "LineNum": 14,
+                            "LineNum": 13,
                             "type": "text"
                         }
                     ],
