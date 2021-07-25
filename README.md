@@ -242,6 +242,9 @@
 </code></pre>
 </details>
 
+## 添加应用
+[查找节点](./app/qidian.ts)
+
 ## TIPS
 
 > 无运行时依赖

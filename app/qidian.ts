@@ -22,7 +22,7 @@ function search(ast: any, keywords: string) {
                     }
                 })
                 if (check.length) {
-                    debugger
+                    // debugger
                     console.log(top)
                     stack = [top]
                     count++
@@ -43,3 +43,4 @@ let res = search(ast, "update detail cf blue")
 console.log(res.attr)
 let title = res.attr.filter((item: any) => item.name === "title")
 console.log(title)
+console.log(title[0].value)
