@@ -179,28 +179,12 @@ function parseText(lexer) {
             lexer.lineNum += 1;
             content += lexer.sourceCode.slice(0, 2);
             lexer.skipSourceCode(2);
-            const length = lexer.stack.length;
-            if (length >= 3) {
-                let token = lexer.stack[length - 3].token;
-                if (token === "script" || token === "noscript") {
-                    continue;
-                }
-            }
-            break;
         }
         else {
             if (lexer.isNewLine(lexer.sourceCode[0])) {
                 lexer.lineNum += 1;
                 content += lexer.sourceCode[0];
                 lexer.skipSourceCode(1);
-                const length = lexer.stack.length;
-                if (length >= 3) {
-                    let token = lexer.stack[length - 3].token;
-                    if (token === "script" || token === "noscript") {
-                        continue;
-                    }
-                }
-                break;
             }
             else {
                 content += lexer.sourceCode[0];
