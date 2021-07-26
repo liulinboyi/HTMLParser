@@ -11,3 +11,4 @@
 /out/*.json
 /files/*
 /test/testfile.js
+/app/*
