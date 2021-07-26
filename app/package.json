@@ -1,0 +1,17 @@
+{
+  "name": "app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "done": "ts-node ./qidian.ts"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "request": "^2.88.2",
+    "request-promise": "^4.2.6",
+    "ts-node": "^10.1.0"
+  }
+}
