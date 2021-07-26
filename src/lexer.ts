@@ -1,4 +1,4 @@
-import { Keywords, TokenNameMap } from "./definition";
+import { Keywords, TokenNameMap } from "./definition.js";
 
 /*
 tag-open ::= '<' tag-name ws* attr-list? ws* '>'

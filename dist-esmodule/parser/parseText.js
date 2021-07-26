@@ -1,19 +1,15 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.parseText = exports.isClose = exports.Node = void 0;
-const lexer_js_1 = require("../lexer.js");
-const Html_js_1 = require("./Html.js");
-class Node {
+import { COMMENT, regexName, TOKEN_CLOSE, TOKEN_CONTENT_TEXT, TOKEN_DTD, TOKEN_LEFT_PAREN, TOKEN_NAME, TOKEN_RIGHT_PAREN, TOKEN_SELF_CLOSE } from "../lexer.js";
+import { parseHtml } from "./Html.js";
+export class Node {
     constructor() {
         this.content = "";
     }
 }
-exports.Node = Node;
-function isClose(lexer) {
+export function isClose(lexer) {
     const length = lexer.stack.length;
     const topTwo = length >= 2 ? lexer.stack[length - 2].tokenType : "";
-    const isTOKEN_DTD = topTwo === lexer_js_1.TOKEN_DTD;
-    const isCOMMENT = topTwo === lexer_js_1.COMMENT;
+    const isTOKEN_DTD = topTwo === TOKEN_DTD;
+    const isCOMMENT = topTwo === COMMENT;
     if (length >= 2 &&
         (isTOKEN_DTD /*dtd*/ ||
             isCOMMENT /*comment*/)) {
@@ -23,21 +19,20 @@ function isClose(lexer) {
         return false;
     const topThree = lexer.stack[length - 3].tokenType;
     const topFour = lexer.stack[length - 4].tokenType;
-    const isTOKEN_RIGHT_PAREN = topTwo === lexer_js_1.TOKEN_RIGHT_PAREN;
-    const isTOKEN_NAME = topThree === lexer_js_1.TOKEN_NAME;
+    const isTOKEN_RIGHT_PAREN = topTwo === TOKEN_RIGHT_PAREN;
+    const isTOKEN_NAME = topThree === TOKEN_NAME;
     // </a>
     let one = isTOKEN_RIGHT_PAREN /*>*/ &&
         isTOKEN_NAME /*tag_name*/ &&
-        topFour === lexer_js_1.TOKEN_CLOSE /*</*/;
+        topFour === TOKEN_CLOSE /*</*/;
     // <a>
     let close = isTOKEN_RIGHT_PAREN /*>*/ &&
-        topThree === lexer_js_1.TOKEN_NAME /*tag_name*/ &&
-        topFour === lexer_js_1.TOKEN_LEFT_PAREN /*<*/;
+        topThree === TOKEN_NAME /*tag_name*/ &&
+        topFour === TOKEN_LEFT_PAREN /*<*/;
     // />
-    let selfClose = topTwo === lexer_js_1.TOKEN_SELF_CLOSE; // /> <br />
+    let selfClose = topTwo === TOKEN_SELF_CLOSE; // /> <br />
     return one || close || selfClose;
 }
-exports.isClose = isClose;
 /*
 提取出来的公共代码
 */
@@ -45,14 +40,14 @@ function judgeEnd(lexer) {
     if (lexer.sourceCode.slice(0, 2) === "</" /*在这里是什么特征看调用函数的注释部分contentText</div>*/ ||
         lexer.sourceCode.slice(0, 2) === "<!" /*在这里是什么特征看调用函数的注释部分contentText<!----> || <!DOCTYPE*/ ||
         (lexer.sourceCode[0] === "<" &&
-            lexer_js_1.regexName.test(lexer.sourceCode[1])) /*在这里是什么特征看调用函数的注释部分contentText<div>*/) {
+            regexName.test(lexer.sourceCode[1])) /*在这里是什么特征看调用函数的注释部分contentText<div>*/) {
         return false;
     }
     else {
         /*在这里是什么特征看调用函数的注释部分contentText<br />*/
         if ((lexer.sourceCode[0] === "<"
-            && lexer_js_1.regexName.test(lexer.sourceCode[1]))) {
-            let parseRes = Html_js_1.parseHtml(lexer);
+            && regexName.test(lexer.sourceCode[1]))) {
+            let parseRes = parseHtml(lexer);
             if (parseRes.selfClose) {
                 return false;
             }
@@ -69,9 +64,9 @@ function contentEnd(lexer) {
     const length = stack.length;
     if (isClose(lexer) &&
         length >= 4 &&
-        stack[length - 2].tokenType === lexer_js_1.TOKEN_RIGHT_PAREN /*>*/ &&
-        stack[length - 3].tokenType === lexer_js_1.TOKEN_NAME /*name*/ &&
-        stack[length - 4].tokenType === lexer_js_1.TOKEN_LEFT_PAREN /*<*/) {
+        stack[length - 2].tokenType === TOKEN_RIGHT_PAREN /*>*/ &&
+        stack[length - 3].tokenType === TOKEN_NAME /*name*/ &&
+        stack[length - 4].tokenType === TOKEN_LEFT_PAREN /*<*/) {
         // <script>
         if (lexer.stack[length - 3].token === "script") {
             /*
@@ -110,9 +105,9 @@ function contentEnd(lexer) {
     // </div>contentText<br />
     if (isClose(lexer) &&
         length >= 4 &&
-        stack[length - 2].tokenType === lexer_js_1.TOKEN_RIGHT_PAREN /*>*/ &&
-        stack[length - 3].tokenType === lexer_js_1.TOKEN_NAME /*name*/ &&
-        stack[length - 4].tokenType === lexer_js_1.TOKEN_CLOSE /*</*/) {
+        stack[length - 2].tokenType === TOKEN_RIGHT_PAREN /*>*/ &&
+        stack[length - 3].tokenType === TOKEN_NAME /*name*/ &&
+        stack[length - 4].tokenType === TOKEN_CLOSE /*</*/) {
         judgeEnd(lexer);
     }
     // <br />contentText<div>
@@ -121,9 +116,9 @@ function contentEnd(lexer) {
     // <br />contentText<br />
     if (isClose(lexer) &&
         length >= 4 &&
-        stack[length - 2].tokenType === lexer_js_1.TOKEN_SELF_CLOSE /*self-close /> <br />*/ &&
-        stack[length - 3].tokenType === lexer_js_1.TOKEN_NAME /*name*/ &&
-        stack[length - 4].tokenType === lexer_js_1.TOKEN_LEFT_PAREN /*<*/) {
+        stack[length - 2].tokenType === TOKEN_SELF_CLOSE /*self-close /> <br />*/ &&
+        stack[length - 3].tokenType === TOKEN_NAME /*name*/ &&
+        stack[length - 4].tokenType === TOKEN_LEFT_PAREN /*<*/) {
         judgeEnd(lexer);
     }
     // <!---->contentText<div>
@@ -131,7 +126,7 @@ function contentEnd(lexer) {
     // <!---->contentText</div>
     // <!---->contentText<br />
     if (isClose(lexer) &&
-        stack[length - 2].tokenType === lexer_js_1.COMMENT /*COMMENT*/) {
+        stack[length - 2].tokenType === COMMENT /*COMMENT*/) {
         judgeEnd(lexer);
     }
     // <!DOCTYPE html>contentText<div>
@@ -139,16 +134,16 @@ function contentEnd(lexer) {
     // <!DOCTYPE html>contentText<!---->
     // <!DOCTYPE html>contentText<br />
     if (isClose(lexer) &&
-        stack[length - 2].tokenType === lexer_js_1.TOKEN_DTD /*DTD*/) {
+        stack[length - 2].tokenType === TOKEN_DTD /*DTD*/) {
         judgeEnd(lexer);
     }
     /*contentText<div>*/
     /*contentText<!----> || <!DOCTYPE*/
     /*contentText</div>*/
     /*contentText<br />*/
-    if (stack[length - 1].tokenType === lexer_js_1.TOKEN_CONTENT_TEXT /*contentText*/) {
+    if (stack[length - 1].tokenType === TOKEN_CONTENT_TEXT /*contentText*/) {
         if ((lexer.sourceCode[0] === "<" &&
-            lexer_js_1.regexName.test(lexer.sourceCode[1])) /*contentText<div>*/ ||
+            regexName.test(lexer.sourceCode[1])) /*contentText<div>*/ ||
             lexer.sourceCode.slice(0, 2) === "<!" /*contentText<!----> || <!DOCTYPE*/ ||
             lexer.sourceCode.slice(0, 2) === "</" /*contentText</div>*/) {
             return false;
@@ -156,8 +151,8 @@ function contentEnd(lexer) {
         else {
             /*contentText<br />*/
             if ((lexer.sourceCode[0] === "<"
-                && lexer_js_1.regexName.test(lexer.sourceCode[1]))) {
-                let parseRes = Html_js_1.parseHtml(lexer);
+                && regexName.test(lexer.sourceCode[1]))) {
+                let parseRes = parseHtml(lexer);
                 if (parseRes.selfClose) {
                     return false;
                 }
@@ -168,7 +163,7 @@ function contentEnd(lexer) {
     // return true
     throw new Error(`not find contentEnd! at line ${lexer.GetLineNum()} ${lexer.sourceCode.slice(0, 100)}`);
 }
-function parseText(lexer) {
+export function parseText(lexer) {
     lexer.hasCache = false;
     let node = new Node();
     lexer.isIgnored();
@@ -197,4 +192,3 @@ function parseText(lexer) {
     node.type = "text";
     return node;
 }
-exports.parseText = parseText;

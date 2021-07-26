@@ -1,5 +1,4 @@
-import { Lexer, TOKEN_EQUAL, TOKEN_LEFT_PAREN, TOKEN_NAME, TOKEN_QUOTE, TOKEN_RIGHT_PAREN, TOKEN_SELF_CLOSE, TOKEN_SINGLE_QUOTE } from "../lexer";
-import { parseText } from "./parseText";
+import { Lexer, TOKEN_EQUAL, TOKEN_LEFT_PAREN, TOKEN_NAME, TOKEN_QUOTE, TOKEN_RIGHT_PAREN, TOKEN_SELF_CLOSE, TOKEN_SINGLE_QUOTE } from "../lexer.js";
 
 export interface Node {
     LineNum?: number,

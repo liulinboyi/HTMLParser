@@ -1,7 +1,7 @@
 const fs = require('fs')
 const path = require('path')
 const request = require("request-promise")
-const parser = require('../src/parser')
+const parser = require('./dist/parser')
 
 async function done() {
 

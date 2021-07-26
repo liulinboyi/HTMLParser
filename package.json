@@ -17,6 +17,8 @@
   },
   "scripts": {
     "test": "ts-node ./test/test.ts",
-    "build": "rm -rf ./dist/ && tsc"
+    "build": "rm -rf ./dist/ && tsc --project ./tsconfig.json",
+    "build-es": "rm -rf ./dist-esmodule/ && tsc --project ./tsconfig-esmodule.json",
+    "build-all": "npm run build && npm run build-es"
   }
 }

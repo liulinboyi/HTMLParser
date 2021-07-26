@@ -1,4 +1,4 @@
-import { Lexer } from "../lexer";
+import { Lexer } from "../lexer.js";
 
 export function parseDtd(lexer: Lexer) {
     let content = ""

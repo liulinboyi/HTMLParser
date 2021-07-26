@@ -1,5 +1,5 @@
-import { Lexer, TOKEN_RIGHT_PAREN } from "../lexer";
-import { parseTag } from "./Html";
+import { Lexer, TOKEN_RIGHT_PAREN } from "../lexer.js";
+import { parseTag } from "./Html.js";
 
 export interface Node {
     LineNum?: number,

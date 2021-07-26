@@ -1,9 +1,9 @@
-import { COMMENT, Lexer, NewLexer, TOKEN_CLOSE, TOKEN_CONTENT_TEXT, TOKEN_DTD, TOKEN_EOF, TOKEN_IGNORED, TOKEN_LEFT_PAREN } from "./lexer"
-import { parseHtml } from "./parser/Html"
-import { parseText } from "./parser/parseText"
-import { isSpecialTag, parseClose } from "./parser/tagClose"
-import { parseDtd } from "./parser/DTD"
-import { paseComment } from "./parser/Comment"
+import { COMMENT, Lexer, NewLexer, TOKEN_CLOSE, TOKEN_CONTENT_TEXT, TOKEN_DTD, TOKEN_EOF, TOKEN_IGNORED, TOKEN_LEFT_PAREN } from "./lexer.js"
+import { parseHtml } from "./parser/Html.js"
+import { parseText } from "./parser/parseText.js"
+import { isSpecialTag, parseClose } from "./parser/tagClose.js"
+import { parseDtd } from "./parser/DTD.js"
+import { paseComment } from "./parser/Comment.js"
 
 export interface Program {
     type?: string,

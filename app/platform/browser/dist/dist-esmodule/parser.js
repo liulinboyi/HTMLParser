@@ -1,19 +1,15 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.parse = exports.Program = void 0;
-const lexer_js_1 = require("./lexer.js");
-const Html_js_1 = require("./parser/Html.js");
-const parseText_js_1 = require("./parser/parseText.js");
-const tagClose_js_1 = require("./parser/tagClose.js");
-const DTD_js_1 = require("./parser/DTD.js");
-const Comment_js_1 = require("./parser/Comment.js");
-class Program {
+import { COMMENT, NewLexer, TOKEN_CLOSE, TOKEN_CONTENT_TEXT, TOKEN_DTD, TOKEN_EOF, TOKEN_IGNORED, TOKEN_LEFT_PAREN } from "./lexer.js";
+import { parseHtml } from "./parser/Html.js";
+import { parseText } from "./parser/parseText.js";
+import { isSpecialTag, parseClose } from "./parser/tagClose.js";
+import { parseDtd } from "./parser/DTD.js";
+import { paseComment } from "./parser/Comment.js";
+export class Program {
     constructor() {
         this.type = 'root';
         this.children = [];
     }
 }
-exports.Program = Program;
 // SourceCode ::= Statement+ 
 function parseSourceCode(lexer) {
     let LineNum = lexer.GetLineNum();
@@ -41,7 +37,7 @@ function parseStatements(lexer) {
         const length = stack.length - 1;
         if (!s.closeTag) {
             stack[length].children.push(s); // 栈顶就是levalElement层级元素
-            if (s.type === "tag" && !s.selfClose && !tagClose_js_1.isSpecialTag(s)) {
+            if (s.type === "tag" && !s.selfClose && !isSpecialTag(s)) {
                 stack.push(s);
             }
         }
@@ -61,11 +57,11 @@ function parseStatements(lexer) {
 }
 function parseStatement(lexer) {
     // 向前看一个token并跳过
-    lexer.LookAheadAndSkip(lexer_js_1.TOKEN_IGNORED); // skip if source code start with ignored token
+    lexer.LookAheadAndSkip(TOKEN_IGNORED); // skip if source code start with ignored token
     let look = lexer.LookAhead().tokenType;
     let flag = false;
     let top = lexer.stack[lexer.stack.length - 1];
-    if (top.tokenType === lexer_js_1.TOKEN_CONTENT_TEXT
+    if (top.tokenType === TOKEN_CONTENT_TEXT
     // isClose(lexer) &&
     // top.tokenType !== TOKEN_LEFT_PAREN /*<*/ &&
     // top.tokenType !== TOKEN_CLOSE /*</*/ &&
@@ -78,30 +74,29 @@ function parseStatement(lexer) {
         flag = false;
     }
     if (flag) {
-        return parseText_js_1.parseText(lexer);
+        return parseText(lexer);
     }
     else {
         switch (look) {
-            case lexer_js_1.TOKEN_LEFT_PAREN: // <
-                return Html_js_1.parseHtml(lexer);
-            case lexer_js_1.TOKEN_CLOSE: // </
-                return tagClose_js_1.parseClose(lexer);
-            case lexer_js_1.TOKEN_DTD: // dtd
-                return DTD_js_1.parseDtd(lexer);
-            case lexer_js_1.COMMENT:
-                return Comment_js_1.paseComment(lexer);
+            case TOKEN_LEFT_PAREN: // <
+                return parseHtml(lexer);
+            case TOKEN_CLOSE: // </
+                return parseClose(lexer);
+            case TOKEN_DTD: // dtd
+                return parseDtd(lexer);
+            case COMMENT:
+                return paseComment(lexer);
             default:
                 throw new Error(`parseStatement(): unknown Statement. at line ${lexer.GetLineNum()} ${lexer.sourceCode.slice(0, 50)}`);
         }
     }
 }
 function isSourceCodeEnd(token) {
-    return token === lexer_js_1.TOKEN_EOF;
+    return token === TOKEN_EOF;
 }
-function parse(code) {
-    let lexer = lexer_js_1.NewLexer(code);
+export function parse(code) {
+    let lexer = NewLexer(code);
     let sourceCode = parseSourceCode(lexer);
-    lexer.NextTokenIs(lexer_js_1.TOKEN_EOF);
+    lexer.NextTokenIs(TOKEN_EOF);
     return sourceCode;
 }
-exports.parse = parse;

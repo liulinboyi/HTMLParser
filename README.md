@@ -250,3 +250,9 @@
 > 无运行时依赖
 
 没有做到浏览器那样兼容性巨好，HTML写成啥样都不报错都会解析，我只解析了一部分奇葩写法~有的HTML写法太奇葩了，要兼容就需要更多的分支和处理，需要更多的精力就算了。
+
+## 注意
+
+## tsc编译后无法加上.js后缀，导致无法使用module，所以在所有ts文件导入加上了js后缀
+## https://segmentfault.com/q/1010000038671707
+## [社区讨论](https://github.com/microsoft/TypeScript/issues/16577)

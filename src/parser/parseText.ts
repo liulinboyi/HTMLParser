@@ -1,5 +1,5 @@
-import { COMMENT, Lexer, regexName, TOKEN_CLOSE, TOKEN_CONTENT_TEXT, TOKEN_DTD, TOKEN_LEFT_PAREN, TOKEN_NAME, TOKEN_RIGHT_PAREN, TOKEN_SELF_CLOSE } from "../lexer";
-import { parseHtml } from "./Html";
+import { COMMENT, Lexer, regexName, TOKEN_CLOSE, TOKEN_CONTENT_TEXT, TOKEN_DTD, TOKEN_LEFT_PAREN, TOKEN_NAME, TOKEN_RIGHT_PAREN, TOKEN_SELF_CLOSE } from "../lexer.js";
+import { parseHtml } from "./Html.js";
 
 
 export interface Node {
