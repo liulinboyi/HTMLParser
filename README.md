@@ -243,7 +243,7 @@
 </details>
 
 ## 添加应用
-[查找节点](./app/qidian.ts)
+[查找节点](./app/platform)
 
 ## TIPS
 
