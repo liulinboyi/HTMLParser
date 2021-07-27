@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.parseHtml = exports.parseAttr = exports.parseDoubleQuotedAttr = exports.parseSingleQuotedAttr = exports.parseString = exports.parseValue = exports.parseName = exports.parseTag = exports.Node = void 0;
-const lexer_js_1 = require("../lexer.js");
+const lexer_1 = require("../lexer");
 class Node {
     constructor() {
         this.children = [];
@@ -10,7 +10,7 @@ class Node {
 }
 exports.Node = Node;
 function parseTag(lexer) {
-    return lexer.NextTokenIs(lexer_js_1.TOKEN_NAME).nowToken; // tag_name
+    return lexer.NextTokenIs(lexer_1.TOKEN_NAME).nowToken; // tag_name
 }
 exports.parseTag = parseTag;
 function parseName(lexer, node) {
@@ -68,28 +68,28 @@ function parseString(lexer) {
 exports.parseString = parseString;
 function parseSingleQuotedAttr(lexer) {
     let value = "";
-    lexer.NextTokenIs(lexer_js_1.TOKEN_SINGLE_QUOTE);
+    lexer.NextTokenIs(lexer_1.TOKEN_SINGLE_QUOTE);
     lexer.stack.pop();
     let res = /[^']*/.exec(lexer.sourceCode);
     if (res) {
         value = res[0];
     }
     lexer.skipSourceCode(value.length);
-    lexer.NextTokenIs(lexer_js_1.TOKEN_SINGLE_QUOTE);
+    lexer.NextTokenIs(lexer_1.TOKEN_SINGLE_QUOTE);
     lexer.stack.pop();
     return value;
 }
 exports.parseSingleQuotedAttr = parseSingleQuotedAttr;
 function parseDoubleQuotedAttr(lexer) {
     let value = "";
-    lexer.NextTokenIs(lexer_js_1.TOKEN_QUOTE);
+    lexer.NextTokenIs(lexer_1.TOKEN_QUOTE);
     lexer.stack.pop();
     let res = /[^"]*/.exec(lexer.sourceCode);
     if (res) {
         value = res[0];
     }
     lexer.skipSourceCode(value.length);
-    lexer.NextTokenIs(lexer_js_1.TOKEN_QUOTE);
+    lexer.NextTokenIs(lexer_1.TOKEN_QUOTE);
     lexer.stack.pop();
     return value;
 }
@@ -103,7 +103,7 @@ function parseAttr(lexer, node) {
         attrItem = genereteAttr(attr); // name
         lexer.isIgnored(); // 空格
         if (lexer.sourceCode[0] === "=") {
-            lexer.NextTokenIs(lexer_js_1.TOKEN_EQUAL); // =
+            lexer.NextTokenIs(lexer_1.TOKEN_EQUAL); // =
             lexer.stack.pop();
             lexer.isIgnored(); // 空格 
             attrItem.value = parseValue(lexer);
@@ -120,13 +120,13 @@ exports.parseAttr = parseAttr;
 function checkAttrEnd(lexer, node) {
     if (lexer.sourceCode[0] === ">") {
         lexer.skipSourceCode(1);
-        lexer.stack.push({ lineNum: lexer.lineNum, tokenType: lexer_js_1.TOKEN_RIGHT_PAREN /*>*/, token: ">" });
+        lexer.stack.push({ lineNum: lexer.lineNum, tokenType: lexer_1.TOKEN_RIGHT_PAREN /*>*/, token: ">" });
         return false;
     }
     else if (lexer.sourceCode.slice(0, 2) === "/>") {
         node.selfClose = true;
         lexer.skipSourceCode(2);
-        lexer.stack.push({ lineNum: lexer.lineNum, tokenType: lexer_js_1.TOKEN_SELF_CLOSE /*/> <br />*/, token: "/>" });
+        lexer.stack.push({ lineNum: lexer.lineNum, tokenType: lexer_1.TOKEN_SELF_CLOSE /*/> <br />*/, token: "/>" });
         return false;
     }
     else {
@@ -136,7 +136,7 @@ function checkAttrEnd(lexer, node) {
 function parseHtml(lexer) {
     let node = new Node();
     node.LineNum = lexer.GetLineNum();
-    lexer.NextTokenIs(lexer_js_1.TOKEN_LEFT_PAREN); // <
+    lexer.NextTokenIs(lexer_1.TOKEN_LEFT_PAREN); // <
     node.type = "tag";
     node.tag = parseTag(lexer);
     lexer.isIgnored();

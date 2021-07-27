@@ -72,6 +72,7 @@
     "examples",
     "test",
     "app",
-    "dist-esmodule"
+    "dist-esmodule",
+    "script",
   ],
 }

@@ -1,1 +1,1 @@
-export { parse as paser } from "./parser.js"
+export { parse as paser } from "./parser"

@@ -253,6 +253,9 @@
 
 ## 注意
 
-## tsc编译后无法加上.js后缀，导致无法使用module，所以在所有ts文件导入加上了js后缀
+## ~~tsc编译后无法加上.js后缀，导致无法使用module，所以在所有ts文件导入加上了js后缀~~
 ## https://segmentfault.com/q/1010000038671707
 ## [社区讨论](https://github.com/microsoft/TypeScript/issues/16577)
+
+## 已解决
+## 写了个[脚本](./script/addSuffixJs.js)，将所有编译后的ES modules的导入导出部分加上了js后缀

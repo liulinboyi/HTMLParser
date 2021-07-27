@@ -1,4 +1,4 @@
-import { Lexer } from "../lexer.js";
+import { Lexer } from "../lexer";
 
 export function paseComment(lexer: Lexer) {
     let content = ""
