@@ -56,7 +56,7 @@ function parseStatements(lexer: Lexer) {
             if (stack[length].tag !== s.tag) {
                 stack[length].children.push(s)
                 // 学习浏览器HTML解析，即使匹配不上也不报错，直接添加到levalElement层级元素当child
-                console.error(`${stack[length].tag} and ${s.tag} is not math! at line ${lexer.GetLineNum()} ${lexer.sourceCode.slice(0, 100)}`)
+                console.warn(`${stack[length].tag} and ${s.tag} is not math! at line ${lexer.GetLineNum()} ${lexer.sourceCode.slice(0, 100)}`)
                 // throw new Error(`${stack[length].tag} and ${s.tag} is not math! at line ${lexer.GetLineNum()} ${lexer.sourceCode.slice(0, 100)}`)
             } else {
                 stack.pop()
