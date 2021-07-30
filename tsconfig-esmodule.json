@@ -74,5 +74,6 @@
     "app",
     "dist",
     "script",
+    "copy"
   ],
 }
