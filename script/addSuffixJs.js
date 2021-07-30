@@ -23,7 +23,7 @@ void async function () {
 
                 let personList = await fs.readFile(pat, {encoding: "utf8"})
 
-                var regexpNames = /(?:export|import)(?:\s)*?(?:\{?).*?(?:\}?)(?:\s)*?from(?:\s)*?"(.+?)"/gm
+                var regexpNames = /(?:export|import)(?:\s)*?(?:\{)??.*?(?:\})??(?:\s)*?from(?:\s)*?"(.+?)"/gm
 
                 var match = personList.matchAll(regexpNames);
 
