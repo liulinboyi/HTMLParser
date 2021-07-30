@@ -74,5 +74,6 @@
     "app",
     "dist-esmodule",
     "script",
+    "copy"
   ],
 }
