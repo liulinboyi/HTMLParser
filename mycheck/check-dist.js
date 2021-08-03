@@ -14,8 +14,8 @@ let paths = [
     "test6.html",
     "test7.html",
     "test8.html",
-    "MDN HTML.html",
-    "MDN JavaScript.html",
+    "MDN_HTML.html",
+    "MDN_JavaScript.html",
     "CSDN.html",
     "CSDN_SPM.html", // error
     "test9.html",
