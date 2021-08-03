@@ -146,9 +146,6 @@ function parseStatements(lexer: Lexer) {
     // let mainBodyFinishedIsText = false
     // 先调用LookAhead一次，将GetNextToken的结果缓存
     while (!isSourceCodeEnd(lexer.LookAhead().tokenType)) {
-        if(lexer.GetLineNum() === 10) {
-            debugger
-        }
         let statement: any = {}
         statement = parseStatement(lexer)
         // console.log(`at line ${lexer.GetLineNum()} ${lexer.sourceCode.slice(0, 30)}`)
