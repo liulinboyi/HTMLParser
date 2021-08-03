@@ -74,6 +74,14 @@
     "app",
     "dist-esmodule",
     "script",
-    "copy"
+    "copy",
+    "mycheck",
+    "coverage",
+    "matchtest",
+    "compare.js",
+    "jest-playwright.config.js",
+    "jest.config.js",
+    "server.js",
+    "test-server.js",
   ],
 }
