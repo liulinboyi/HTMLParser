@@ -1,5 +1,6 @@
 import { COMMENT, Lexer, regexName, TOKEN_CLOSE, TOKEN_CONTENT_TEXT, TOKEN_DTD, TOKEN_LEFT_PAREN, TOKEN_NAME, TOKEN_RIGHT_PAREN, TOKEN_SELF_CLOSE } from "../lexer";
 import { parseHtml } from "./Html";
+import { isSpecialTag, parseClose } from "./tagClose";
 
 
 export interface Node {
@@ -212,6 +213,37 @@ export function parseText(lexer: Lexer) {
                 content += lexer.sourceCode[0]
                 lexer.skipSourceCode(1)
             }
+        }
+    }
+
+    if (
+        lexer.stack.length >= 3 &&
+        isSpecialTag({ tag: lexer.stack[lexer.stack.length - 3].token })) {
+        let token = lexer.stack[lexer.stack.length - 3].token
+        let tokenLen = `</${token}>`.length
+        if (lexer.sourceCode.slice(0, tokenLen) === `</${token}>`) {
+            lexer.skipSourceCode(2)
+            let res = { lineNum: lexer.lineNum, tokenType: TOKEN_CLOSE, token: "</" }
+            lexer.stack.push(res)
+            parseClose(lexer)
+            lexer.GetNextToken()
+            while (contentEnd(lexer) && !lexer.isEmpty()) {
+                if (lexer.nextSourceCodeIs("\r\n") || lexer.nextSourceCodeIs("\n\r")) {
+                    lexer.lineNum += 1
+                    content += lexer.sourceCode.slice(0, 2)
+                    lexer.skipSourceCode(2)
+                } else {
+                    if (lexer.isNewLine(lexer.sourceCode[0])) {
+                        lexer.lineNum += 1
+                        content += lexer.sourceCode[0]
+                        lexer.skipSourceCode(1)
+                    } else {
+                        content += lexer.sourceCode[0]
+                        lexer.skipSourceCode(1)
+                    }
+                }
+            }
+            lexer.stack.splice(lexer.stack.length - 4, lexer.stack.length - 1)
         }
     }
 

@@ -72,7 +72,7 @@ function parseStatements(lexer: Lexer) {
         "blockquote",
         "canvas",
         "dd",
-        "div",
+        // "div",
         "dl",
         "fieldset",
         "figcaption",
@@ -143,9 +143,13 @@ function parseStatements(lexer: Lexer) {
 
     let body: any = null
     let mainBodyFinished = false
+    let uniqueStack = []
     // let mainBodyFinishedIsText = false
     // 先调用LookAhead一次，将GetNextToken的结果缓存
     while (!isSourceCodeEnd(lexer.LookAhead().tokenType)) {
+        if (lexer.GetLineNum() === 20) {
+            debugger
+        }
         let statement: any = {}
         statement = parseStatement(lexer)
         // console.log(`at line ${lexer.GetLineNum()} ${lexer.sourceCode.slice(0, 30)}`)
@@ -158,6 +162,7 @@ function parseStatements(lexer: Lexer) {
         }
         if (!s.closeTag) {
 
+            uniqueStack = []
             if (notInSelf.includes(s.tag) && s.tag === stack[length].tag) { // 不能包含自己的元素
                 stack.pop()
                 stack[stack.length - 1].children.push(s)
@@ -198,6 +203,7 @@ function parseStatements(lexer: Lexer) {
             }
         } else {
             if (stack[length].tag !== s.tag) {
+                uniqueStack.push(s)
                 // 处理多个body标签的问题
                 // 如果当前第一个body标签解析完成（mainBodyFinished），并且当前结束标签是body，则直接进行下次循环
                 if (mainBodyFinished && s.tag === "body") {
@@ -216,6 +222,10 @@ function parseStatements(lexer: Lexer) {
                     mainBodyFinished = true
                 }
                 stack.pop()
+                if (uniqueStack.length > 0 && uniqueStack[uniqueStack.length - 1].tag === stack[stack.length - 1].tag) {
+                    uniqueStack.pop()
+                    stack.pop()
+                }
             }
         }
     }
