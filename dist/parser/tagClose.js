@@ -31,7 +31,7 @@ function parseClose(lexer) {
     node.type = "tag";
     node.tag = Html_1.parseTag(lexer);
     lexer.NextTokenIs(lexer_1.TOKEN_RIGHT_PAREN); // >
-    lexer.isIgnored();
+    // lexer.isIgnored()
     if (isSpecialTag(node)) {
         return null;
     }

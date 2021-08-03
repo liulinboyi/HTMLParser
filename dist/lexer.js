@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.NewLexer = exports.Lexer = exports.tokenNameMap = exports.keywords = exports.regexName = exports.SourceCharacter = exports.COMMENT = exports.INTERGER = exports.TOKEN_IGNORED = exports.TOKEN_NAME = exports.TOKEN_SELF_CLOSE = exports.TOKEN_DTD = exports.TOKEN_CLOSE = exports.TOKEN_CONTENT_TEXT = exports.TOKEN_DUOQUOTE = exports.TOKEN_LEFT_LINE = exports.TOKEN_SINGLE_QUOTE = exports.TOKEN_QUOTE = exports.TOKEN_EQUAL = exports.TOKEN_RIGHT_PAREN = exports.TOKEN_TAG_NAME = exports.TOKEN_LEFT_PAREN = exports.TOKEN_EOF = exports.Tokens = void 0;
+exports.NewLexer = exports.Lexer = exports.tokenNameMap = exports.keywords = exports.regexName = exports.SourceCharacter = exports.DIRECTIVE = exports.COMMENT = exports.INTERGER = exports.TOKEN_IGNORED = exports.TOKEN_NAME = exports.TOKEN_SELF_CLOSE = exports.TOKEN_DTD = exports.TOKEN_CLOSE = exports.TOKEN_CONTENT_TEXT = exports.TOKEN_DUOQUOTE = exports.TOKEN_LEFT_LINE = exports.TOKEN_SINGLE_QUOTE = exports.TOKEN_QUOTE = exports.TOKEN_EQUAL = exports.TOKEN_RIGHT_PAREN = exports.TOKEN_TAG_NAME = exports.TOKEN_LEFT_PAREN = exports.TOKEN_EOF = exports.Tokens = void 0;
 // token const
 var Tokens;
 (function (Tokens) {
@@ -21,9 +21,10 @@ var Tokens;
     Tokens[Tokens["TOKEN_IGNORED"] = 14] = "TOKEN_IGNORED";
     Tokens[Tokens["INTERGER"] = 15] = "INTERGER";
     Tokens[Tokens["COMMENT"] = 16] = "COMMENT";
-    Tokens[Tokens["SourceCharacter"] = 17] = "SourceCharacter";
+    Tokens[Tokens["DIRECTIVE"] = 17] = "DIRECTIVE";
+    Tokens[Tokens["SourceCharacter"] = 18] = "SourceCharacter";
 })(Tokens = exports.Tokens || (exports.Tokens = {}));
-exports.TOKEN_EOF = Tokens.TOKEN_EOF, exports.TOKEN_LEFT_PAREN = Tokens.TOKEN_LEFT_PAREN, exports.TOKEN_TAG_NAME = Tokens.TOKEN_TAG_NAME, exports.TOKEN_RIGHT_PAREN = Tokens.TOKEN_RIGHT_PAREN, exports.TOKEN_EQUAL = Tokens.TOKEN_EQUAL, exports.TOKEN_QUOTE = Tokens.TOKEN_QUOTE, exports.TOKEN_SINGLE_QUOTE = Tokens.TOKEN_SINGLE_QUOTE, exports.TOKEN_LEFT_LINE = Tokens.TOKEN_LEFT_LINE, exports.TOKEN_DUOQUOTE = Tokens.TOKEN_DUOQUOTE, exports.TOKEN_CONTENT_TEXT = Tokens.TOKEN_CONTENT_TEXT, exports.TOKEN_CLOSE = Tokens.TOKEN_CLOSE, exports.TOKEN_DTD = Tokens.TOKEN_DTD, exports.TOKEN_SELF_CLOSE = Tokens.TOKEN_SELF_CLOSE, exports.TOKEN_NAME = Tokens.TOKEN_NAME, exports.TOKEN_IGNORED = Tokens.TOKEN_IGNORED, exports.INTERGER = Tokens.INTERGER, exports.COMMENT = Tokens.COMMENT, exports.SourceCharacter = Tokens.SourceCharacter;
+exports.TOKEN_EOF = Tokens.TOKEN_EOF, exports.TOKEN_LEFT_PAREN = Tokens.TOKEN_LEFT_PAREN, exports.TOKEN_TAG_NAME = Tokens.TOKEN_TAG_NAME, exports.TOKEN_RIGHT_PAREN = Tokens.TOKEN_RIGHT_PAREN, exports.TOKEN_EQUAL = Tokens.TOKEN_EQUAL, exports.TOKEN_QUOTE = Tokens.TOKEN_QUOTE, exports.TOKEN_SINGLE_QUOTE = Tokens.TOKEN_SINGLE_QUOTE, exports.TOKEN_LEFT_LINE = Tokens.TOKEN_LEFT_LINE, exports.TOKEN_DUOQUOTE = Tokens.TOKEN_DUOQUOTE, exports.TOKEN_CONTENT_TEXT = Tokens.TOKEN_CONTENT_TEXT, exports.TOKEN_CLOSE = Tokens.TOKEN_CLOSE, exports.TOKEN_DTD = Tokens.TOKEN_DTD, exports.TOKEN_SELF_CLOSE = Tokens.TOKEN_SELF_CLOSE, exports.TOKEN_NAME = Tokens.TOKEN_NAME, exports.TOKEN_IGNORED = Tokens.TOKEN_IGNORED, exports.INTERGER = Tokens.INTERGER, exports.COMMENT = Tokens.COMMENT, exports.DIRECTIVE = Tokens.DIRECTIVE, exports.SourceCharacter = Tokens.SourceCharacter;
 // regex match patterns
 exports.regexName = /^[a-zA-z]+[0-9]*([-_:']*[a-zA-z0-9]*)*/;
 // 关键字
@@ -46,6 +47,7 @@ exports.tokenNameMap = {
     [exports.TOKEN_IGNORED]: "Ignored",
     [exports.INTERGER]: "INTERGER",
     [exports.COMMENT]: "COMMENT",
+    [exports.DIRECTIVE]: "DIRECTIVE",
     [exports.SourceCharacter]: "SourceCharacter",
 };
 class Lexer {
@@ -78,16 +80,17 @@ class Lexer {
         //     this.stack.shift()
         // }
         if (this.judgeIsContent) {
-            this.isIgnored();
+            // this.isIgnored()
             // <noscript>
-            if (this.stack.length > 2 && this.stack[this.stack.length - 2].token === "noscript") {
-                return true;
-            }
+            // if (this.stack.length > 2 && this.stack[this.stack.length - 2].token === "noscript") {
+            //     return true
+            // }
             if (this.sourceCode[0] === "<") {
                 this.sourceCode = origin;
                 return false;
             }
             else {
+                this.sourceCode = origin;
                 return true;
             }
         }
@@ -198,12 +201,9 @@ class Lexer {
     // 匹配Token并跳过匹配的Token
     MatchToken() {
         this.checkCode(this.sourceCode[0]); // 只做检查，不吃字符
-        // check ignored
-        if (this.isIgnored()) {
-            let res = { lineNum: this.lineNum, tokenType: exports.TOKEN_IGNORED, token: "Ignored" };
-            this.stack.push(res);
-            return res;
-        }
+        // if(this.lineNum === 12) {
+        //     debugger
+        // }
         // finish
         if (this.sourceCode.length == 0) {
             let res = { lineNum: this.lineNum, tokenType: exports.TOKEN_EOF, token: exports.tokenNameMap[exports.TOKEN_EOF] };
@@ -219,8 +219,15 @@ class Lexer {
             }
         }
         else {
+            // check ignored
+            if (this.isIgnored()) {
+                let res = { lineNum: this.lineNum, tokenType: exports.TOKEN_IGNORED, token: "Ignored" };
+                this.stack.push(res);
+                return res;
+            }
             switch (this.sourceCode[0]) {
                 case '<':
+                    // <!-- -->
                     if (this.sourceCode.slice(0, 4) === "<!--") {
                         this.skipSourceCode(4);
                         let res = { lineNum: this.lineNum, tokenType: exports.COMMENT, token: exports.tokenNameMap[exports.COMMENT] };
@@ -228,6 +235,21 @@ class Lexer {
                         return res;
                     }
                     else if (this.sourceCode[1] === "!") {
+                        let origin = this.sourceCode;
+                        this.sourceCode = this.sourceCode.slice(2);
+                        this.isIgnored();
+                        // <![if gte IE 8.0] > 这种情况需要兼容
+                        if (this.sourceCode[0] === "[") {
+                            this.sourceCode = origin;
+                            this.skipSourceCode(1);
+                            let res = { lineNum: this.lineNum, tokenType: exports.COMMENT, token: exports.tokenNameMap[exports.COMMENT] };
+                            this.stack.push(JSON.parse(JSON.stringify(res))); // 这里偷个懒，虽然是DIRECTIVE但是仍然按COMMENT入栈
+                            res.tokenType = exports.DIRECTIVE; // 这里修改tokenType为DIRECTIVE是为了后面判断
+                            return res;
+                        }
+                        else {
+                            this.sourceCode = origin;
+                        }
                         this.skipSourceCode(2);
                         let res = { lineNum: this.lineNum, tokenType: exports.TOKEN_DTD, token: exports.tokenNameMap[exports.TOKEN_DTD] };
                         this.stack.push(res);
@@ -282,7 +304,7 @@ class Lexer {
             let tag_name = exports.regexName.exec(this.sourceCode);
             if (tag_name) {
                 let tag = "";
-                tag = tag_name[0];
+                tag = tag_name[0].toLocaleLowerCase(); // 变小写
                 this.skipSourceCode(tag.length);
                 let res = { lineNum: this.lineNum, tokenType: exports.TOKEN_NAME /*tag_name*/, token: tag };
                 this.stack.push(res);
