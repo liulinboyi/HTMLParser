@@ -107,6 +107,7 @@ export function parseAttr(lexer: Lexer, node: any) {
     } = {}
     lexer.isIgnored(); // 空格
     let tag = parseName(lexer, node)
+    lexer.isIgnored() // 空格
     if (tag) {
         let attr = tag
         attrItem = genereteAttr(attr); // name
@@ -161,6 +162,6 @@ export function parseHtml(lexer: Lexer) {
         let res = parseAttr(lexer, node)
         node.attr.push(res)
     }
-    lexer.isIgnored()
+    // lexer.isIgnored()
     return node
 }

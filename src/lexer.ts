@@ -58,6 +58,7 @@ export enum Tokens {
     TOKEN_IGNORED,            // Ignored  
     INTERGER,                 // [0-9]+
     COMMENT,                  // Ignored "#" SourceCharacter Ignored
+    DIRECTIVE,                // <![if gte IE 8.0]>
     SourceCharacter,          // 所有代码字符串
 }
 
@@ -79,6 +80,7 @@ export const {
     TOKEN_IGNORED,            // Ignored  
     INTERGER,                 // [0-9]+
     COMMENT,                  // Ignored "#" SourceCharacter Ignored
+    DIRECTIVE,                // <![if gte IE 8.0]>
     SourceCharacter,          // 所有代码字符串
 } = Tokens
 
@@ -107,6 +109,7 @@ export const tokenNameMap: TokenNameMap = {
     [TOKEN_IGNORED]: "Ignored",
     [INTERGER]: "INTERGER",
     [COMMENT]: "COMMENT",
+    [DIRECTIVE]: "DIRECTIVE",
     [SourceCharacter]: "SourceCharacter",
 }
 
@@ -143,15 +146,16 @@ export class Lexer {
         //     this.stack.shift()
         // }
         if (this.judgeIsContent) {
-            this.isIgnored()
+            // this.isIgnored()
             // <noscript>
-            if (this.stack.length > 2 && this.stack[this.stack.length - 2].token === "noscript") {
-                return true
-            }
+            // if (this.stack.length > 2 && this.stack[this.stack.length - 2].token === "noscript") {
+            //     return true
+            // }
             if (this.sourceCode[0] === "<") {
                 this.sourceCode = origin
                 return false
             } else {
+                this.sourceCode = origin
                 return true
             }
         } else {
@@ -263,12 +267,10 @@ export class Lexer {
     // 匹配Token并跳过匹配的Token
     MatchToken(): { lineNum: number, tokenType: number, token: string } {
         this.checkCode(this.sourceCode[0]) // 只做检查，不吃字符
-        // check ignored
-        if (this.isIgnored()) {
-            let res = { lineNum: this.lineNum, tokenType: TOKEN_IGNORED, token: "Ignored" }
-            this.stack.push(res)
-            return res
-        }
+        // if(this.lineNum === 12) {
+        //     debugger
+        // }
+
         // finish
         if (this.sourceCode.length == 0) {
             let res = { lineNum: this.lineNum, tokenType: TOKEN_EOF, token: tokenNameMap[TOKEN_EOF] }
@@ -284,9 +286,16 @@ export class Lexer {
                 return res
             }
         } else {
+            // check ignored
+            if (this.isIgnored()) {
+                let res = { lineNum: this.lineNum, tokenType: TOKEN_IGNORED, token: "Ignored" }
+                this.stack.push(res)
+                return res
+            }
 
             switch (this.sourceCode[0]) {
                 case '<':
+                    // <!-- -->
                     if (this.sourceCode.slice(0, 4) === "<!--") {
                         this.skipSourceCode(4)
                         let res = { lineNum: this.lineNum, tokenType: COMMENT, token: tokenNameMap[COMMENT] }
@@ -294,6 +303,20 @@ export class Lexer {
                         return res
                     }
                     else if (this.sourceCode[1] === "!") {
+                        let origin = this.sourceCode
+                        this.sourceCode = this.sourceCode.slice(2)
+                        this.isIgnored()
+                        // <![if gte IE 8.0] > 这种情况需要兼容
+                        if (this.sourceCode[0] === "[") {
+                            this.sourceCode = origin
+                            this.skipSourceCode(1)
+                            let res = { lineNum: this.lineNum, tokenType: COMMENT, token: tokenNameMap[COMMENT] }
+                            this.stack.push(JSON.parse(JSON.stringify(res))) // 这里偷个懒，虽然是DIRECTIVE但是仍然按COMMENT入栈
+                            res.tokenType = DIRECTIVE // 这里修改tokenType为DIRECTIVE是为了后面判断
+                            return res
+                        } else {
+                            this.sourceCode = origin
+                        }
                         this.skipSourceCode(2)
                         let res = { lineNum: this.lineNum, tokenType: TOKEN_DTD, token: tokenNameMap[TOKEN_DTD] }
                         this.stack.push(res)
@@ -346,7 +369,7 @@ export class Lexer {
             let tag_name = regexName.exec(this.sourceCode);
             if (tag_name) {
                 let tag = ""
-                tag = tag_name[0]
+                tag = tag_name[0].toLocaleLowerCase() // 变小写
                 this.skipSourceCode(tag.length)
                 let res = { lineNum: this.lineNum, tokenType: TOKEN_NAME /*tag_name*/, token: tag }
                 this.stack.push(res)

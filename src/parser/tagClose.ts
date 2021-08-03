@@ -39,7 +39,7 @@ export function parseClose(lexer: Lexer) {
     node.type = "tag"
     node.tag = parseTag(lexer)
     lexer.NextTokenIs(TOKEN_RIGHT_PAREN) // >
-    lexer.isIgnored()
+    // lexer.isIgnored()
     if (isSpecialTag(node)) {
         return null
     }

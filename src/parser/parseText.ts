@@ -91,27 +91,27 @@ function contentEnd(lexer: Lexer) {
                 '<script src="https://"><\/script>'
             </script>
             */
-            let script = "</script>"
-            if (lexer.sourceCode.slice(0, script.length) === script) {
+            let script = ["</script>", "</SCRIPT>"]
+            if (script.includes(lexer.sourceCode.slice(0, script[0].length))) {
                 return false
             } else {
                 return true
             }
         }
         // noscript
-        if (lexer.stack[length - 3].token === "noscript") {
-            /*
-            <script>
-                '<script src="https://"><\/script>'
-            </script>
-            */
-            let script = "</noscript>"
-            if (lexer.sourceCode.slice(0, script.length) === script) {
-                return false
-            } else {
-                return true
-            }
-        }
+        // if (lexer.stack[length - 3].token === "noscript") {
+        //     /*
+        //     <script>
+        //         '<script src="https://"><\/script>'
+        //     </script>
+        //     */
+        //     let script = "</noscript>"
+        //     if (lexer.sourceCode.slice(0, script.length) === script) {
+        //         return false
+        //     } else {
+        //         return true
+        //     }
+        // }
         judgeEnd(lexer)
     }
     // </div>contentText<div>
@@ -194,7 +194,7 @@ export function parseText(lexer: Lexer) {
     lexer.hasCache = false
     let node = new Node()
 
-    lexer.isIgnored();
+    // lexer.isIgnored();
     node.LineNum = lexer.GetLineNum()
 
     let content = ""
@@ -215,7 +215,7 @@ export function parseText(lexer: Lexer) {
         }
     }
 
-    lexer.isIgnored();
+    // lexer.isIgnored();
     node.content = content
 
     node.type = "text"
