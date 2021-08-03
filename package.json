@@ -5,9 +5,14 @@
     "dist"
   ],
   "devDependencies": {
+    "@playwright/test": "^1.13.1",
     "@types/node": "^14.14.20",
+    "cross-env": "^7.0.3",
+    "playwright": "^1.13.1",
     "prettier": "2.2.1",
     "pretty-quick": "3.1.0",
+    "request": "^2.88.2",
+    "request-promise": "^4.2.6",
     "ts-lint": "4.5.1",
     "ts-loader": "8.0.15",
     "ts-node": "^9.1.1",
@@ -16,9 +21,11 @@
     "typescript": "^4.1.3"
   },
   "scripts": {
-    "test": "ts-node ./test/test.ts",
+    "test-ts": "ts-node ./mycheck/check.ts",
     "build": "rm -rf ./dist/ && tsc --project ./tsconfig.json",
     "build-es": "rm -rf ./dist-esmodule/ && tsc --project ./tsconfig-esmodule.json && node ./script/addSuffixJs.js",
-    "build-all": "npm run build && npm run build-es"
+    "build-all": "npm run build && npm run build-es",
+    "test": "playwright test testall.spec.ts",
+    "test-all": "node test-server.js"
   }
 }
