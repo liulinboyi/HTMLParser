@@ -243,7 +243,7 @@
 </details>
 
 ## 添加应用
-[查找节点](./app/platform)
+[查找节点](https://github.com/liulinboyi/HTMLParser-App/tree/main/platform)
 
 ## TIPS
 
