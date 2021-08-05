@@ -259,5 +259,5 @@
 
 #### 已解决，写了个[脚本](./script/addSuffixJs.js)，将所有编译后的ES modules的导入导出部分加上了js后缀
 
-## 测试
+## [测试](./test)
 #### 使用[playwright](https://github.com/microsoft/playwright.git)和浏览器生成的DOM结构做了对比，除了一些奇葩写法，其他基本没问题。
