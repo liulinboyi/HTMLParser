@@ -107,6 +107,7 @@ let paths = [
   "test35.html",
   "test36.html",
   "test38.html",
+  "test39.html",
 ]
 
 for (let item of paths) {

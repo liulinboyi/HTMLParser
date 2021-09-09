@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.parseText = exports.isClose = exports.Node = void 0;
 const lexer_1 = require("../lexer");
 const Html_1 = require("./Html");
+const tagClose_1 = require("./tagClose");
 class Node {
     constructor() {
         this.content = "";
@@ -189,6 +190,37 @@ function parseText(lexer) {
                 content += lexer.sourceCode[0];
                 lexer.skipSourceCode(1);
             }
+        }
+    }
+    if (lexer.stack.length >= 3 &&
+        tagClose_1.isSpecialTag({ tag: lexer.stack[lexer.stack.length - 3].token })) {
+        let token = lexer.stack[lexer.stack.length - 3].token;
+        let tokenLen = `</${token}>`.length;
+        if (lexer.sourceCode.slice(0, tokenLen) === `</${token}>`) {
+            lexer.skipSourceCode(2);
+            let res = { lineNum: lexer.lineNum, tokenType: lexer_1.TOKEN_CLOSE, token: "</" };
+            lexer.stack.push(res);
+            tagClose_1.parseClose(lexer);
+            lexer.GetNextToken();
+            while (contentEnd(lexer) && !lexer.isEmpty()) {
+                if (lexer.nextSourceCodeIs("\r\n") || lexer.nextSourceCodeIs("\n\r")) {
+                    lexer.lineNum += 1;
+                    content += lexer.sourceCode.slice(0, 2);
+                    lexer.skipSourceCode(2);
+                }
+                else {
+                    if (lexer.isNewLine(lexer.sourceCode[0])) {
+                        lexer.lineNum += 1;
+                        content += lexer.sourceCode[0];
+                        lexer.skipSourceCode(1);
+                    }
+                    else {
+                        content += lexer.sourceCode[0];
+                        lexer.skipSourceCode(1);
+                    }
+                }
+            }
+            lexer.stack.splice(lexer.stack.length - 4, lexer.stack.length - 1);
         }
     }
     // lexer.isIgnored();
