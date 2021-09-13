@@ -166,7 +166,9 @@ for (let item of paths) {
     // let body = search(ast, "body")
 
     let parser = getAll(ast.children, "parser")
-
+    if (!fs.existsSync(path.resolve(__dirname, "../out/"))) {
+      fs.mkdirSync(path.resolve(__dirname, "../out/"))
+    }
     fs.writeFileSync(path.resolve(__dirname, "../out/", `./$parser.ast.json`), JSON.stringify(parser, null, 4))
     fs.writeFileSync(path.resolve(__dirname, "../out/", `./$browser.ast.json`), JSON.stringify(browser, null, 4))
 
