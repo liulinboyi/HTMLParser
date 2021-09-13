@@ -2,6 +2,8 @@
 
 ## 解析HTML
 
+[![Tests](https://github.com/liulinboyi/HTMLParser/actions/workflows/tests.yml/badge.svg)](https://github.com/liulinboyi/HTMLParser/actions/workflows/tests.yml)
+
 ## HTML
 
 ```html
