@@ -1,6 +1,19 @@
 import { Lexer } from "../lexer";
 
+interface DTD {
+    content?: string,
+    type: string,
+    LineNum: number
+}
+
+class DTD {
+    constructor() {
+        this.type = "DTD"
+    }
+}
+
 export function parseDtd(lexer: Lexer) {
+    let dtd = new DTD()
     let content = ""
     while (lexer.sourceCode[0] !== ">") {
         if (lexer.nextSourceCodeIs("\r\n") || lexer.nextSourceCodeIs("\n\r")) {
@@ -22,9 +35,7 @@ export function parseDtd(lexer: Lexer) {
     lexer.skipSourceCode(1)
     lexer.isIgnored()
     lexer.hasCache = false
-    return {
-        type: "DTD",
-        LineNum: lexer.GetLineNum(),
-        content
-    }
+    dtd.content = content
+    dtd.LineNum = lexer.GetLineNum()
+    return dtd
 }

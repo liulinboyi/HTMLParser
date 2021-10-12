@@ -6,13 +6,37 @@ export interface Node {
     attr: Array<any>,
     type?: string,
     tag?: string,
-    selfClose?: boolean
+    selfClose?: boolean,
+    parent?: any,
 }
+
+let temp = Symbol("temp")
+let nextSibling = temp
 
 export class Node {
     constructor() {
         this.children = []
         this.attr = []
+    }
+    get nextSibling() {
+        if (nextSibling !== temp) return nextSibling
+        if (!this.parent) return null
+        let lengtn = this.parent.children.length
+        let index = -1
+        for (let item of this.parent.children) {
+            index++
+            if (item === this) {
+                break
+            }
+        }
+        if (index + 1 > lengtn) {
+            return null
+        }
+        return this.parent.children[index + 1]
+    }
+
+    set nextSibling(value: any) {
+        nextSibling = value
     }
 }
 
@@ -143,6 +167,9 @@ function checkAttrEnd(lexer: Lexer, node: Node) {
 
 export function parseHtml(lexer: Lexer) {
     let node = new Node()
+    if (!lexer.check) {
+        node.nextSibling = null
+    }
 
     node.LineNum = lexer.GetLineNum()
     lexer.NextTokenIs(TOKEN_LEFT_PAREN) // <

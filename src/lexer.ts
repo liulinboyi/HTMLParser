@@ -37,6 +37,7 @@ export interface Lexer {
     nextTokenLineNum: number
     hasCache: boolean
     stack: Array<any>
+    check: boolean
 }
 
 // token const

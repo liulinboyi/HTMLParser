@@ -8,12 +8,36 @@ export interface Node {
     children?: Array<any>,
     content: string,
     type?: string,
-    selfClose?: boolean
+    selfClose?: boolean,
+    parent?: any,
 }
+
+let temp = Symbol("temp")
+let nextSibling = temp
 
 export class Node {
     constructor() {
         this.content = ""
+    }
+    get nextSibling() {
+        if (nextSibling !== temp) return nextSibling
+        if (!this.parent) return null
+        let lengtn = this.parent.children.length
+        let index = -1
+        for (let item of this.parent.children) {
+            index++
+            if (item === this) {
+                break
+            }
+        }
+        if (index + 1 > lengtn) {
+            return null
+        }
+        return this.parent.children[index + 1]
+    }
+
+    set nextSibling(value: any) {
+        nextSibling = value
     }
 }
 
@@ -194,6 +218,9 @@ function contentEnd(lexer: Lexer) {
 export function parseText(lexer: Lexer) {
     lexer.hasCache = false
     let node = new Node()
+    if (!lexer.check) {
+        node.nextSibling = null
+    }
 
     // lexer.isIgnored();
     node.LineNum = lexer.GetLineNum()

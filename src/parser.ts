@@ -21,9 +21,9 @@ export class Program {
 
 
 // SourceCode ::= Statement+ 
-function parseSourceCode(lexer: Lexer) {
+function parseSourceCode(lexer: Lexer, check: boolean) {
     let LineNum = lexer.GetLineNum()
-    let root = parseStatements(lexer)
+    let root = parseStatements(lexer, check)
     root.LineNum = LineNum
     return root
 }
@@ -54,7 +54,11 @@ function filterText(children: any) {
 }
 
 // Statement
-function parseStatements(lexer: Lexer) {
+function parseStatements(lexer: Lexer, check: boolean) {
+
+    if (check) {
+        lexer.check = true
+    }
 
     let root: any = {
         type: "root",
@@ -147,9 +151,9 @@ function parseStatements(lexer: Lexer) {
     // let mainBodyFinishedIsText = false
     // 先调用LookAhead一次，将GetNextToken的结果缓存
     while (!isSourceCodeEnd(lexer.LookAhead().tokenType)) {
-        if (lexer.GetLineNum() === 20) {
-            debugger
-        }
+        // if (lexer.GetLineNum() === 20) {
+        //     debugger
+        // }
         let statement: any = {}
         statement = parseStatement(lexer)
         // console.log(`at line ${lexer.GetLineNum()} ${lexer.sourceCode.slice(0, 30)}`)
@@ -167,6 +171,9 @@ function parseStatements(lexer: Lexer) {
                 stack.pop()
                 stack[stack.length - 1].children.push(s)
                 stack.push(s)
+                if (check) {
+                    s.parent = stack[stack.length - 1]
+                }
                 continue
             }
 
@@ -187,6 +194,9 @@ function parseStatements(lexer: Lexer) {
             }
 
             stack[length].children.push(s) // 栈顶就是levalElement层级元素
+            if (check) {
+                s.parent = stack[length]
+            }
             if (s.type === "tag" && !s.selfClose && !isSpecialTag(s)) {
                 stack.push(s)
                 // 处理多个body标签的问题
@@ -194,6 +204,9 @@ function parseStatements(lexer: Lexer) {
                 if (mainBodyFinished && s.tag === "body") {
                     stack.pop()
                     stack[length].children.pop()
+                    if (check) {
+                        s.parent = null
+                    }
                 }
             }
             // 处理多个body标签的问题
@@ -209,8 +222,11 @@ function parseStatements(lexer: Lexer) {
                 if (mainBodyFinished && s.tag === "body") {
                     continue
                 }
-                if (Block_level_elements.includes(s.tag)) { // 入过是块级元素会加入到levalElement层级元素当child
+                if (Block_level_elements.includes(s.tag)) { // 如果是块级元素会加入到levalElement层级元素当child
                     stack[length].children.push(s)
+                    if (check) {
+                        s.parent = stack[length]
+                    }
                 }
                 // 学习浏览器HTML解析，即使匹配不上也不报错，直接添加到levalElement层级元素当child
                 console.warn(`${stack[length].tag} and ${s.tag} is not math! at line ${lexer.GetLineNum()} ${lexer.sourceCode.slice(0, 100)}`)
@@ -267,6 +283,9 @@ function parseStatements(lexer: Lexer) {
                 root.children[i - 1].delete = true
             }
         }
+        if (check) {
+            root.children[i].parent = null
+        }
     }
 
     root.children = root.children.filter((item: any) => !item.delete)
@@ -319,10 +338,10 @@ function isSourceCodeEnd(token: number): boolean {
     return token === TOKEN_EOF
 }
 
-export function parse(code: string) {
+export function parse(code: string, check: boolean) {
 
     let lexer = NewLexer(code)
-    let sourceCode = parseSourceCode(lexer);
+    let sourceCode = parseSourceCode(lexer, check);
 
     lexer.NextTokenIs(TOKEN_EOF)
     return sourceCode

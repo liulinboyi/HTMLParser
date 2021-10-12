@@ -55,6 +55,7 @@ let paths = [
     // "test35.html",
     // "test36.html",
     // "test38.html",
+    // "test40.html",
 ]
 
 for (let p of paths) {
@@ -62,7 +63,7 @@ for (let p of paths) {
     // console.log(code, 'code')
     if (code.length > 0) {
         // console.time("test")
-        let ast = paser(code)
+        let ast = paser(code, true)
         // console.timeEnd("test")
         // console.log(__dirname, __filename)
         console.log(path.resolve(__dirname, "../out/", `./${p}.ast.json`))

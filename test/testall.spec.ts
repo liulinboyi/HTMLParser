@@ -161,7 +161,7 @@ for (let item of paths) {
       },
     })
 
-    let ast = parse(html)
+    let ast = parse(html, false)
 
     // let body = search(ast, "body")
 
