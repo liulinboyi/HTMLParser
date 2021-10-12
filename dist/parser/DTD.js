@@ -1,7 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.parseDtd = void 0;
+class DTD {
+    constructor() {
+        this.type = "DTD";
+    }
+}
 function parseDtd(lexer) {
+    let dtd = new DTD();
     let content = "";
     while (lexer.sourceCode[0] !== ">") {
         if (lexer.nextSourceCodeIs("\r\n") || lexer.nextSourceCodeIs("\n\r")) {
@@ -24,10 +30,8 @@ function parseDtd(lexer) {
     lexer.skipSourceCode(1);
     lexer.isIgnored();
     lexer.hasCache = false;
-    return {
-        type: "DTD",
-        LineNum: lexer.GetLineNum(),
-        content
-    };
+    dtd.content = content;
+    dtd.LineNum = lexer.GetLineNum();
+    return dtd;
 }
 exports.parseDtd = parseDtd;

@@ -2,10 +2,33 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.parseHtml = exports.parseAttr = exports.parseDoubleQuotedAttr = exports.parseSingleQuotedAttr = exports.parseString = exports.parseValue = exports.parseName = exports.parseTag = exports.Node = void 0;
 const lexer_1 = require("../lexer");
+let temp = Symbol("temp");
+let nextSibling = temp;
 class Node {
     constructor() {
         this.children = [];
         this.attr = [];
+    }
+    get nextSibling() {
+        if (nextSibling !== temp)
+            return nextSibling;
+        if (!this.parent)
+            return null;
+        let lengtn = this.parent.children.length;
+        let index = -1;
+        for (let item of this.parent.children) {
+            index++;
+            if (item === this) {
+                break;
+            }
+        }
+        if (index + 1 > lengtn) {
+            return null;
+        }
+        return this.parent.children[index + 1];
+    }
+    set nextSibling(value) {
+        nextSibling = value;
     }
 }
 exports.Node = Node;
@@ -136,6 +159,9 @@ function checkAttrEnd(lexer, node) {
 }
 function parseHtml(lexer) {
     let node = new Node();
+    if (!lexer.check) {
+        node.nextSibling = null;
+    }
     node.LineNum = lexer.GetLineNum();
     lexer.NextTokenIs(lexer_1.TOKEN_LEFT_PAREN); // <
     node.type = "tag";

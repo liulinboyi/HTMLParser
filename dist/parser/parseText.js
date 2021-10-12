@@ -4,9 +4,32 @@ exports.parseText = exports.isClose = exports.Node = void 0;
 const lexer_1 = require("../lexer");
 const Html_1 = require("./Html");
 const tagClose_1 = require("./tagClose");
+let temp = Symbol("temp");
+let nextSibling = temp;
 class Node {
     constructor() {
         this.content = "";
+    }
+    get nextSibling() {
+        if (nextSibling !== temp)
+            return nextSibling;
+        if (!this.parent)
+            return null;
+        let lengtn = this.parent.children.length;
+        let index = -1;
+        for (let item of this.parent.children) {
+            index++;
+            if (item === this) {
+                break;
+            }
+        }
+        if (index + 1 > lengtn) {
+            return null;
+        }
+        return this.parent.children[index + 1];
+    }
+    set nextSibling(value) {
+        nextSibling = value;
     }
 }
 exports.Node = Node;
@@ -171,6 +194,9 @@ function contentEnd(lexer) {
 function parseText(lexer) {
     lexer.hasCache = false;
     let node = new Node();
+    if (!lexer.check) {
+        node.nextSibling = null;
+    }
     // lexer.isIgnored();
     node.LineNum = lexer.GetLineNum();
     let content = "";
