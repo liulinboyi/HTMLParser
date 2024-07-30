@@ -33,6 +33,11 @@ async function exec(shell, args, opt) {
 }
 
 let server = http.createServer((req, res) => {
+    if (path.normalize(decodeURIComponent(req.url)) !== decodeURIComponent(req.url)) {
+        res.statusCode = 403;
+        res.end();
+        return;
+    }
     const u = decodeURIComponent(req.url)
     console.log("decodeURIComponent",u)
     // var pathname = url.parse(u).pathname; // 获取url的pathname (/index.html)
